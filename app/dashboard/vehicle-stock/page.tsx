@@ -45,7 +45,7 @@ export default function VehicleStockPage() {
       // Get unique categories
       const uniqueCategories = Array.from(
         new Set(data.items.map((item: VehicleItem) => item.category))
-      );
+      ) as string[];
       setCategories(uniqueCategories);
 
       // Initialize stock items with par levels
