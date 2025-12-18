@@ -40,6 +40,38 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !['ADMIN', 'WAREHOUSE'].includes(session.user.role)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { itemName, category, parLevel, currentQty, unit } = body;
+
+    if (!itemName || !category || !unit || parLevel === undefined || currentQty === undefined) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    const newItem = await prisma.warehouseInventory.create({
+      data: {
+        itemName,
+        category,
+        parLevel,
+        currentQty,
+        unit,
+      },
+    });
+
+    return NextResponse.json(newItem);
+  } catch (error) {
+    console.error('Error creating inventory item:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
 export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

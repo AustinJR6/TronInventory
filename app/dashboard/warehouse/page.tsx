@@ -18,6 +18,14 @@ export default function WarehousePage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<number>(0);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newItem, setNewItem] = useState({
+    itemName: '',
+    category: '',
+    parLevel: 0,
+    currentQty: 0,
+    unit: '',
+  });
 
   useEffect(() => {
     fetchInventory();
@@ -69,6 +77,35 @@ export default function WarehousePage() {
     setEditingId(null);
   };
 
+  const handleAddItem = async () => {
+    try {
+      const response = await fetch('/api/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newItem),
+      });
+
+      if (response.ok) {
+        setShowAddModal(false);
+        setNewItem({
+          itemName: '',
+          category: '',
+          parLevel: 0,
+          currentQty: 0,
+          unit: '',
+        });
+        fetchInventory();
+        alert('Item added successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || 'Failed to add item'}`);
+      }
+    } catch (error) {
+      console.error('Error adding item:', error);
+      alert('Error adding item');
+    }
+  };
+
   const getStockStatus = (item: InventoryItem) => {
     const percentage = (item.currentQty / item.parLevel) * 100;
     if (percentage <= 25) return { color: 'text-red-600', bg: 'bg-red-100', label: 'Critical' };
@@ -82,9 +119,20 @@ export default function WarehousePage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Warehouse Inventory</h1>
-        <p className="mt-2 text-gray-600">Manage and track warehouse stock levels</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Warehouse Inventory</h1>
+          <p className="mt-2 text-gray-300">Manage and track warehouse stock levels</p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="btn-primary flex items-center gap-2"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add New Item
+        </button>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
@@ -92,8 +140,8 @@ export default function WarehousePage() {
           onClick={() => setSelectedCategory('')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             selectedCategory === ''
-              ? 'bg-tron-red text-white'
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'bg-tron-orange text-white'
+              : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
           }`}
         >
           All Categories
@@ -104,8 +152,8 @@ export default function WarehousePage() {
             onClick={() => setSelectedCategory(category)}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               selectedCategory === category
-                ? 'bg-tron-red text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'bg-tron-orange text-white'
+                : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
             }`}
           >
             {category}
@@ -115,52 +163,52 @@ export default function WarehousePage() {
 
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-tron-orange/20">
+            <thead className="bg-tron-black">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
                   Item Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
                   Par Level
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
                   Current Qty
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-tron-gray divide-y divide-tron-orange/20">
               {inventory.map((item) => {
                 const status = getStockStatus(item);
                 const isEditing = editingId === item.id;
 
                 return (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <tr key={item.id} className="hover:bg-tron-gray-light">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                       {item.itemName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {item.category}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                       {item.parLevel} {item.unit}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
                       {isEditing ? (
                         <input
                           type="number"
                           value={editValue}
                           onChange={(e) => setEditValue(parseInt(e.target.value))}
-                          className="w-24 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-tron-red focus:border-transparent"
+                          className="w-24 px-2 py-1 border border-tron-orange/30 rounded-md focus:ring-2 focus:ring-tron-orange focus:border-transparent bg-tron-black text-white"
                           min="0"
                         />
                       ) : (
@@ -177,13 +225,13 @@ export default function WarehousePage() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleSave(item.id)}
-                            className="text-green-600 hover:text-green-900"
+                            className="text-green-400 hover:text-green-300"
                           >
                             Save
                           </button>
                           <button
                             onClick={handleCancel}
-                            className="text-gray-600 hover:text-gray-900"
+                            className="text-gray-400 hover:text-gray-300"
                           >
                             Cancel
                           </button>
@@ -191,7 +239,7 @@ export default function WarehousePage() {
                       ) : (
                         <button
                           onClick={() => handleEdit(item)}
-                          className="text-tron-red hover:text-red-700"
+                          className="text-tron-orange hover:text-tron-orange-light"
                         >
                           Edit
                         </button>
@@ -204,6 +252,96 @@ export default function WarehousePage() {
           </table>
         </div>
       </div>
+
+      {/* Add New Item Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-tron-gray rounded-lg shadow-xl max-w-md w-full p-6 border border-tron-orange/30">
+            <h2 className="text-2xl font-bold text-white mb-4">Add New Item</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Item Name
+                </label>
+                <input
+                  type="text"
+                  value={newItem.itemName}
+                  onChange={(e) => setNewItem({ ...newItem, itemName: e.target.value })}
+                  className="input-field"
+                  placeholder="Enter item name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Category
+                </label>
+                <input
+                  type="text"
+                  value={newItem.category}
+                  onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                  className="input-field"
+                  placeholder="e.g., Wire, Panels, Tools"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Unit
+                </label>
+                <input
+                  type="text"
+                  value={newItem.unit}
+                  onChange={(e) => setNewItem({ ...newItem, unit: e.target.value })}
+                  className="input-field"
+                  placeholder="e.g., ft, pcs, boxes"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Par Level
+                  </label>
+                  <input
+                    type="number"
+                    value={newItem.parLevel}
+                    onChange={(e) => setNewItem({ ...newItem, parLevel: parseInt(e.target.value) || 0 })}
+                    className="input-field"
+                    min="0"
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Current Qty
+                  </label>
+                  <input
+                    type="number"
+                    value={newItem.currentQty}
+                    onChange={(e) => setNewItem({ ...newItem, currentQty: parseInt(e.target.value) || 0 })}
+                    className="input-field"
+                    min="0"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddItem}
+                className="btn-primary flex-1"
+                disabled={!newItem.itemName || !newItem.category || !newItem.unit}
+              >
+                Add Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
