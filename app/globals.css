@@ -26,6 +26,11 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+/* Force dark text on all inputs globally */
+input, select, textarea {
+  color: #111827 !important;
+}
+
 @layer components {
   .btn-primary {
     @apply bg-tron-red hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
