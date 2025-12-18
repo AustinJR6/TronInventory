@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
-          vehicleNumber: user.vehicleNumber,
+          vehicleNumber: user.vehicleNumber || undefined,
         };
       },
     }),
@@ -56,7 +56,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session?.user) {
         session.user.role = token.role as string;
-        session.user.vehicleNumber = token.vehicleNumber as string;
+        session.user.vehicleNumber = (token.vehicleNumber as string | undefined) || undefined;
       }
       return session;
     },
