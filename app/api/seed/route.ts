@@ -16,6 +16,18 @@ export async function POST(request: NextRequest) {
 
     console.log('Starting database seed...');
 
+    // Get or create St. Louis branch
+    const stLouisBranch = await prisma.branch.upsert({
+      where: { name: 'St. Louis' },
+      update: {},
+      create: {
+        name: 'St. Louis',
+        city: 'St. Louis',
+        address: null,
+        active: true,
+      },
+    });
+
     // Create main admin user
     const hashedPassword = await bcrypt.hash('Solar2025!', 10);
     const admin = await prisma.user.upsert({
@@ -23,6 +35,7 @@ export async function POST(request: NextRequest) {
       update: {
         password: hashedPassword,
         active: true,
+        branchId: stLouisBranch.id,
       },
       create: {
         email: 'raustinj39@gmail.com',
@@ -30,6 +43,7 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         role: 'ADMIN',
         active: true,
+        branchId: stLouisBranch.id,
       },
     });
 
@@ -114,13 +128,21 @@ export async function POST(request: NextRequest) {
     let warehouseCount = 0;
     for (const item of warehouseItems) {
       await prisma.warehouseInventory.upsert({
-        where: { itemName: item.itemName },
+        where: {
+          itemName_branchId: {
+            itemName: item.itemName,
+            branchId: stLouisBranch.id,
+          },
+        },
         update: item,
-        create: item,
+        create: {
+          ...item,
+          branchId: stLouisBranch.id,
+        },
       });
       warehouseCount++;
     }
-    console.log(`Created/updated ${warehouseCount} warehouse inventory items`);
+    console.log(`Created/updated ${warehouseCount} warehouse inventory items for St. Louis branch`);
 
     // Vehicle Inventory Items (Par Levels) - Abbreviated for space
     const vehicleItems = [
