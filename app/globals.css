@@ -40,7 +40,7 @@ body {
   }
 
   .input-field {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tron-red focus:border-transparent;
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-tron-red focus:border-transparent bg-white text-gray-900;
   }
 
   .badge {
