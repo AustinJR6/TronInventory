@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  WAREHOUSE
+  FIELD
+}
+
+enum OrderStatus {
+  SUBMITTED
+  IN_PROGRESS
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderType {
+  WEEKLY_STOCK
+  AD_HOC
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String
+  role          UserRole
+  vehicleNumber String?   @unique
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  orders        Order[]
+  vehicleStocks VehicleStock[]
+
+  @@map("users")
+}
+
+model WarehouseInventory {
+  id          String   @id @default(cuid())
+  itemName    String
+  category    String
+  parLevel    Int
+  currentQty  Int
+  unit        String
+  lastUpdated DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+
+  @@map("warehouse_inventory")
+}
+
+model VehicleInventoryItem {
+  id       String @id @default(cuid())
+  itemName String
+  category String
+  parLevel Int
+  unit     String
+
+  vehicleStockItems VehicleStockItem[]
+
+  @@map("vehicle_inventory_items")
+}
+
+model VehicleStock {
+  id            String   @id @default(cuid())
+  userId        String
+  vehicleNumber String
+  weekEnding    DateTime
+  submittedAt   DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id])
+  items         VehicleStockItem[]
+  generatedOrder Order?
+
+  @@map("vehicle_stocks")
+}
+
+model VehicleStockItem {
+  id              String   @id @default(cuid())
+  vehicleStockId  String
+  itemId          String
+  expectedQty     Int
+  actualQty       Int
+  difference      Int
+
+  vehicleStock    VehicleStock @relation(fields: [vehicleStockId], references: [id], onDelete: Cascade)
+  item            VehicleInventoryItem @relation(fields: [itemId], references: [id])
+
+  @@map("vehicle_stock_items")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  userId          String
+  vehicleNumber   String
+  orderType       OrderType
+  status          OrderStatus @default(SUBMITTED)
+  notes           String?
+  vehicleStockId  String?     @unique
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  completedAt     DateTime?
+
+  user            User        @relation(fields: [userId], references: [id])
+  vehicleStock    VehicleStock? @relation(fields: [vehicleStockId], references: [id])
+  items           OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String   @id @default(cuid())
+  orderId             String
+  warehouseItemId     String
+  requestedQty        Int
+  pulledQty           Int      @default(0)
+
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  warehouseItem       WarehouseInventory @relation(fields: [warehouseItemId], references: [id])
+
+  @@map("order_items")
+}
