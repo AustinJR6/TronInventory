@@ -38,18 +38,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 px-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-tron-black px-4">
+      <div className="max-w-md w-full space-y-8 bg-tron-gray p-8 rounded-xl shadow-lg border border-tron-orange/30">
         <div>
           <div className="flex justify-center mb-4">
-            <div className="bg-tron-red text-white w-16 h-16 rounded-lg flex items-center justify-center text-2xl font-bold">
-              TS
-            </div>
+            <Image
+              src="/tron-logo.webp"
+              alt="Tron Solar Logo"
+              width={180}
+              height={72}
+              className="h-18 w-auto"
+            />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
             Tron Solar Inventory
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-300">
             Sign in to access the inventory system
           </p>
         </div>
@@ -90,8 +94,8 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <p className="text-sm text-red-800">{error}</p>
+            <div className="rounded-md bg-red-900/30 border border-red-700 p-4">
+              <p className="text-sm text-red-300">{error}</p>
             </div>
           )}
 

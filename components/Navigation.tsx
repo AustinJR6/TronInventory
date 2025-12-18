@@ -4,6 +4,7 @@ import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 
 interface NavigationProps {
   role: string;
@@ -51,27 +52,28 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
   const items = navItems[role as keyof typeof navItems] || [];
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="bg-tron-black shadow-lg border-b border-tron-orange/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <div className="bg-tron-red text-white w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold">
-                TS
-              </div>
-              <span className="ml-3 text-xl font-semibold text-gray-900">
-                Tron Solar
-              </span>
+              <Image
+                src="/tron-logo.webp"
+                alt="Tron Solar Logo"
+                width={120}
+                height={48}
+                className="h-12 w-auto"
+              />
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {items.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
                     pathname === item.href
-                      ? 'border-tron-red text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      ? 'border-tron-orange text-tron-orange'
+                      : 'border-transparent text-gray-300 hover:border-tron-orange/50 hover:text-white'
                   }`}
                 >
                   {item.label}
@@ -83,17 +85,17 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+                className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-tron-gray transition-colors"
               >
                 <div className="text-sm text-right">
-                  <p className="font-medium text-gray-900">{userName}</p>
-                  <p className="text-gray-500 text-xs">
+                  <p className="font-medium text-white">{userName}</p>
+                  <p className="text-tron-orange text-xs">
                     {role}
                     {vehicleNumber && ` - Vehicle ${vehicleNumber}`}
                   </p>
                 </div>
                 <svg
-                  className={`w-4 h-4 text-gray-500 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-tron-orange transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -103,17 +105,17 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
               </button>
 
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                <div className="absolute right-0 mt-2 w-48 bg-tron-gray rounded-md shadow-lg py-1 z-50 border border-tron-orange/30">
                   <Link
                     href="/dashboard/update-password"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    className="block px-4 py-2 text-sm text-gray-200 hover:bg-tron-gray-light hover:text-tron-orange"
                     onClick={() => setIsProfileOpen(false)}
                   >
                     Update Password
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: '/login' })}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-tron-gray-light"
                   >
                     Sign Out
                   </button>
@@ -125,7 +127,7 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       </div>
 
       {/* Mobile menu */}
-      <div className="sm:hidden border-t border-gray-200">
+      <div className="sm:hidden border-t border-tron-orange/30">
         <div className="pt-2 pb-3 space-y-1">
           {items.map((item) => (
             <Link
@@ -133,8 +135,8 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
               href={item.href}
               className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
                 pathname === item.href
-                  ? 'border-tron-red bg-red-50 text-tron-red'
-                  : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                  ? 'border-tron-orange bg-tron-gray text-tron-orange'
+                  : 'border-transparent text-gray-300 hover:bg-tron-gray hover:border-tron-orange/50 hover:text-white'
               }`}
             >
               {item.label}

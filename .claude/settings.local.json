@@ -22,7 +22,9 @@
       "Bash(npx tsc:*)",
       "Bash(npx prisma db execute:*)",
       "Bash(npx prisma migrate:*)",
-      "Bash(vercel env:*)"
+      "Bash(vercel env:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
