@@ -6,6 +6,15 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
+  // Get St. Louis branch
+  const stLouisBranch = await prisma.branch.findUnique({
+    where: { name: 'St. Louis' },
+  });
+
+  if (!stLouisBranch) {
+    throw new Error('St. Louis branch not found. Please run seed-branches.ts first.');
+  }
+
   // Create main admin user
   const hashedPassword = await bcrypt.hash('Solar2025!', 10);
   const admin = await prisma.user.upsert({
@@ -13,6 +22,7 @@ async function main() {
     update: {
       password: hashedPassword,
       active: true,
+      branchId: stLouisBranch.id,
     },
     create: {
       email: 'raustinj39@gmail.com',
@@ -20,6 +30,7 @@ async function main() {
       password: hashedPassword,
       role: 'ADMIN',
       active: true,
+      branchId: stLouisBranch.id,
     },
   });
 
@@ -102,9 +113,14 @@ async function main() {
 
   console.log('Seeding warehouse inventory...');
   for (const item of warehouseItems) {
-    await prisma.warehouseInventory.create({ data: item });
+    await prisma.warehouseInventory.create({
+      data: {
+        ...item,
+        branchId: stLouisBranch.id,
+      },
+    });
   }
-  console.log(`Created ${warehouseItems.length} warehouse inventory items`);
+  console.log(`Created ${warehouseItems.length} warehouse inventory items for St. Louis branch`);
 
   // Vehicle Inventory Items (Par Levels)
   const vehicleItems = [

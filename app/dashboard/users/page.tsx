@@ -8,12 +8,25 @@ interface User {
   name: string;
   role: string;
   vehicleNumber: string | null;
+  branchId: string | null;
   active: boolean;
   createdAt: string;
+  branch?: {
+    id: string;
+    name: string;
+    city: string;
+  };
+}
+
+interface Branch {
+  id: string;
+  name: string;
+  city: string;
 }
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,10 +35,12 @@ export default function UsersPage() {
     password: 'Solar2025!',
     role: 'FIELD',
     vehicleNumber: '',
+    branchId: '',
   });
 
   useEffect(() => {
     fetchUsers();
+    fetchBranches();
   }, []);
 
   const fetchUsers = async () => {
@@ -38,6 +53,16 @@ export default function UsersPage() {
       console.error('Error fetching users:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch('/api/branches');
+      const data = await response.json();
+      setBranches(data.branches || []);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
     }
   };
 
@@ -61,6 +86,7 @@ export default function UsersPage() {
           password: 'Solar2025!',
           role: 'FIELD',
           vehicleNumber: '',
+          branchId: '',
         });
         fetchUsers();
       } else {
@@ -176,6 +202,24 @@ export default function UsersPage() {
                   <option value="ADMIN">Admin</option>
                 </select>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Branch
+                </label>
+                <select
+                  value={formData.branchId}
+                  onChange={(e) => setFormData({ ...formData, branchId: e.target.value })}
+                  className="input-field"
+                  required
+                >
+                  <option value="">Select a branch...</option>
+                  {branches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name} - {branch.city}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {formData.role === 'FIELD' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -217,6 +261,9 @@ export default function UsersPage() {
                   Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Branch
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Vehicle
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -241,6 +288,9 @@ export default function UsersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <span className="badge bg-blue-100 text-blue-800">{user.role}</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {user.branch ? user.branch.name : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user.vehicleNumber || '-'}

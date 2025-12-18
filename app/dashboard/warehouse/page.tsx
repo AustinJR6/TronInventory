@@ -9,12 +9,26 @@ interface InventoryItem {
   parLevel: number;
   currentQty: number;
   unit: string;
+  branchId: string | null;
+  branch?: {
+    id: string;
+    name: string;
+    city: string;
+  };
+}
+
+interface Branch {
+  id: string;
+  name: string;
+  city: string;
 }
 
 export default function WarehousePage() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<number>(0);
@@ -25,18 +39,35 @@ export default function WarehousePage() {
     parLevel: 0,
     currentQty: 0,
     unit: '',
+    branchId: '',
   });
 
   useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  useEffect(() => {
     fetchInventory();
-  }, [selectedCategory]);
+  }, [selectedCategory, selectedBranch]);
+
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch('/api/branches');
+      const data = await response.json();
+      setBranches(data.branches || []);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
 
   const fetchInventory = async () => {
     try {
       setLoading(true);
-      const url = selectedCategory
-        ? `/api/inventory?category=${encodeURIComponent(selectedCategory)}`
-        : '/api/inventory';
+      const params = new URLSearchParams();
+      if (selectedCategory) params.append('category', selectedCategory);
+      if (selectedBranch) params.append('branchId', selectedBranch);
+
+      const url = params.toString() ? `/api/inventory?${params}` : '/api/inventory';
       const response = await fetch(url);
       const data = await response.json();
       setInventory(data.inventory);
@@ -93,6 +124,7 @@ export default function WarehousePage() {
           parLevel: 0,
           currentQty: 0,
           unit: '',
+          branchId: '',
         });
         fetchInventory();
         alert('Item added successfully!');
@@ -135,30 +167,66 @@ export default function WarehousePage() {
         </button>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        <button
-          onClick={() => setSelectedCategory('')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            selectedCategory === ''
-              ? 'bg-tron-orange text-white'
-              : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
-          }`}
-        >
-          All Categories
-        </button>
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => setSelectedCategory(category)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              selectedCategory === category
-                ? 'bg-tron-orange text-white'
-                : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
-            }`}
-          >
-            {category}
-          </button>
-        ))}
+      <div className="mb-6 space-y-4">
+        {/* Branch Filter */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-300">Branch:</span>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedBranch('')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                selectedBranch === ''
+                  ? 'bg-tron-orange text-white'
+                  : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+              }`}
+            >
+              All Branches
+            </button>
+            {branches.map((branch) => (
+              <button
+                key={branch.id}
+                onClick={() => setSelectedBranch(branch.id)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedBranch === branch.id
+                    ? 'bg-tron-orange text-white'
+                    : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+                }`}
+              >
+                {branch.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-300">Category:</span>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCategory('')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                selectedCategory === ''
+                  ? 'bg-tron-orange text-white'
+                  : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+              }`}
+            >
+              All Categories
+            </button>
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedCategory === category
+                    ? 'bg-tron-orange text-white'
+                    : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="card overflow-hidden">
@@ -273,6 +341,24 @@ export default function WarehousePage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Branch
+                </label>
+                <select
+                  value={newItem.branchId}
+                  onChange={(e) => setNewItem({ ...newItem, branchId: e.target.value })}
+                  className="input-field"
+                  required
+                >
+                  <option value="">Select a branch...</option>
+                  {branches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name} - {branch.city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
                   Category
                 </label>
                 <input
@@ -334,7 +420,7 @@ export default function WarehousePage() {
               <button
                 onClick={handleAddItem}
                 className="btn-primary flex-1"
-                disabled={!newItem.itemName || !newItem.category || !newItem.unit}
+                disabled={!newItem.itemName || !newItem.category || !newItem.unit || !newItem.branchId}
               >
                 Add Item
               </button>

@@ -19,8 +19,16 @@ export async function GET(request: NextRequest) {
         name: true,
         role: true,
         vehicleNumber: true,
+        branchId: true,
         active: true,
         createdAt: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -43,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { email, name, password, role, vehicleNumber } = body;
+    const { email, name, password, role, vehicleNumber, branchId } = body;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -62,6 +70,7 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         role,
         vehicleNumber: role === 'FIELD' ? vehicleNumber : null,
+        branchId: branchId || null,
       },
       select: {
         id: true,
@@ -69,8 +78,16 @@ export async function POST(request: NextRequest) {
         name: true,
         role: true,
         vehicleNumber: true,
+        branchId: true,
         active: true,
         createdAt: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
+          },
+        },
       },
     });
 

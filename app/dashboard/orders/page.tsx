@@ -9,10 +9,16 @@ interface Order {
   status: string;
   notes: string | null;
   vehicleNumber: string;
+  branchId: string | null;
   createdAt: string;
   user: {
     name: string;
     email: string;
+  };
+  branch?: {
+    id: string;
+    name: string;
+    city: string;
   };
   items: {
     id: string;
@@ -27,23 +33,47 @@ interface Order {
   }[];
 }
 
+interface Branch {
+  id: string;
+  name: string;
+  city: string;
+}
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('');
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [pulledQuantities, setPulledQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  useEffect(() => {
     fetchOrders();
-  }, [selectedStatus]);
+  }, [selectedStatus, selectedBranch]);
+
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch('/api/branches');
+      const data = await response.json();
+      setBranches(data.branches || []);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const url = selectedStatus
-        ? `/api/orders?status=${selectedStatus}`
-        : '/api/orders';
+      const params = new URLSearchParams();
+      if (selectedStatus) params.append('status', selectedStatus);
+      if (selectedBranch) params.append('branchId', selectedBranch);
+
+      const url = params.toString() ? `/api/orders?${params}` : '/api/orders';
       const response = await fetch(url);
       const data = await response.json();
       setOrders(data.orders);
@@ -135,30 +165,66 @@ export default function OrdersPage() {
         <p className="mt-2 text-gray-300">Process and fulfill field worker orders</p>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        <button
-          onClick={() => setSelectedStatus('')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-            selectedStatus === ''
-              ? 'bg-tron-orange text-white'
-              : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
-          }`}
-        >
-          All Orders
-        </button>
-        {['SUBMITTED', 'IN_PROGRESS', 'READY', 'COMPLETED'].map((status) => (
-          <button
-            key={status}
-            onClick={() => setSelectedStatus(status)}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              selectedStatus === status
-                ? 'bg-tron-orange text-white'
-                : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
-            }`}
-          >
-            {status.replace('_', ' ')}
-          </button>
-        ))}
+      <div className="mb-6 space-y-4">
+        {/* Branch Filter */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-300">Branch:</span>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedBranch('')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                selectedBranch === ''
+                  ? 'bg-tron-orange text-white'
+                  : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+              }`}
+            >
+              All Branches
+            </button>
+            {branches.map((branch) => (
+              <button
+                key={branch.id}
+                onClick={() => setSelectedBranch(branch.id)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedBranch === branch.id
+                    ? 'bg-tron-orange text-white'
+                    : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+                }`}
+              >
+                {branch.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Status Filter */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-300">Status:</span>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedStatus('')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                selectedStatus === ''
+                  ? 'bg-tron-orange text-white'
+                  : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+              }`}
+            >
+              All Orders
+            </button>
+            {['SUBMITTED', 'IN_PROGRESS', 'READY', 'COMPLETED'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setSelectedStatus(status)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  selectedStatus === status
+                    ? 'bg-tron-orange text-white'
+                    : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+                }`}
+              >
+                {status.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {orders.length === 0 ? (
@@ -176,6 +242,7 @@ export default function OrdersPage() {
                   </h3>
                   <p className="text-sm text-gray-300 mt-1">
                     {order.user.name} - Vehicle {order.vehicleNumber}
+                    {order.branch && <span className="text-tron-orange ml-2">• {order.branch.name}</span>}
                   </p>
                   <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
                 </div>

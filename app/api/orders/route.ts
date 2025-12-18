@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
+    const branchId = searchParams.get('branchId');
 
     let where: any = {};
 
@@ -24,6 +25,10 @@ export async function GET(request: NextRequest) {
       where.status = status;
     }
 
+    if (branchId) {
+      where.branchId = branchId;
+    }
+
     const orders = await prisma.order.findMany({
       where,
       include: {
@@ -32,6 +37,13 @@ export async function GET(request: NextRequest) {
             name: true,
             email: true,
             vehicleNumber: true,
+          },
+        },
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            city: true,
           },
         },
         items: {
@@ -61,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { items, notes } = body;
+    const { items, notes, branchId } = body;
 
     // Generate order number
     const orderCount = await prisma.order.count();
@@ -74,6 +86,7 @@ export async function POST(request: NextRequest) {
         vehicleNumber: session.user.vehicleNumber,
         orderType: 'AD_HOC',
         notes,
+        branchId: branchId || null,
         items: {
           create: items.map((item: any) => ({
             warehouseItemId: item.warehouseItemId,

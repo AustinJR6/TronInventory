@@ -24,6 +24,24 @@ enum OrderStatus {
 enum OrderType {
   WEEKLY_STOCK
   AD_HOC
+  TRANSFER
+}
+
+model Branch {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  city          String
+  address       String?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  users              User[]
+  warehouseInventory WarehouseInventory[]
+  vehicleStocks      VehicleStock[]
+  orders             Order[]
+
+  @@map("branches")
 }
 
 model User {
@@ -33,10 +51,12 @@ model User {
   password      String
   role          UserRole
   vehicleNumber String?   @unique
+  branchId      String?
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  branch        Branch?   @relation(fields: [branchId], references: [id])
   orders        Order[]
   vehicleStocks VehicleStock[]
 
@@ -45,16 +65,19 @@ model User {
 
 model WarehouseInventory {
   id          String   @id @default(cuid())
-  itemName    String   @unique
+  itemName    String
   category    String
   parLevel    Int
   currentQty  Int
   unit        String
+  branchId    String?
   lastUpdated DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  branch      Branch?  @relation(fields: [branchId], references: [id])
   orderItems  OrderItem[]
 
+  @@unique([itemName, branchId])
   @@map("warehouse_inventory")
 }
 
@@ -74,10 +97,12 @@ model VehicleStock {
   id            String   @id @default(cuid())
   userId        String
   vehicleNumber String
+  branchId      String?
   weekEnding    DateTime
   submittedAt   DateTime @default(now())
 
   user          User     @relation(fields: [userId], references: [id])
+  branch        Branch?  @relation(fields: [branchId], references: [id])
   items         VehicleStockItem[]
   generatedOrder Order?
 
@@ -103,6 +128,7 @@ model Order {
   orderNumber     String      @unique
   userId          String
   vehicleNumber   String
+  branchId        String?
   orderType       OrderType
   status          OrderStatus @default(SUBMITTED)
   notes           String?
@@ -112,6 +138,7 @@ model Order {
   completedAt     DateTime?
 
   user            User        @relation(fields: [userId], references: [id])
+  branch          Branch?     @relation(fields: [branchId], references: [id])
   vehicleStock    VehicleStock? @relation(fields: [vehicleStockId], references: [id])
   items           OrderItem[]
 

@@ -11,6 +11,7 @@ export default async function DashboardPage() {
   }
 
   const role = session.user.role;
+  const userBranchId = session.user.branchId;
 
   // Get stats based on role
   let stats = {
@@ -18,17 +19,33 @@ export default async function DashboardPage() {
     pendingOrders: 0,
     lowStockItems: 0,
     activeUsers: 0,
+    branchName: '',
   };
 
+  // Get user's branch info if available
+  if (userBranchId) {
+    const branch = await prisma.branch.findUnique({
+      where: { id: userBranchId },
+      select: { name: true },
+    });
+    stats.branchName = branch?.name || '';
+  }
+
   if (role === 'ADMIN' || role === 'WAREHOUSE') {
+    // For warehouse workers, filter by their branch; admins see all branches
+    const branchFilter = role === 'WAREHOUSE' && userBranchId ? { branchId: userBranchId } : {};
+
     const [totalOrders, pendingOrders, allWarehouseItems, activeUsers] = await Promise.all([
-      prisma.order.count(),
-      prisma.order.count({ where: { status: { in: ['SUBMITTED', 'IN_PROGRESS'] } } }),
-      prisma.warehouseInventory.findMany({ select: { currentQty: true, parLevel: true } }),
+      prisma.order.count({ where: branchFilter }),
+      prisma.order.count({ where: { ...branchFilter, status: { in: ['SUBMITTED', 'IN_PROGRESS'] } } }),
+      prisma.warehouseInventory.findMany({
+        where: branchFilter,
+        select: { currentQty: true, parLevel: true }
+      }),
       role === 'ADMIN' ? prisma.user.count({ where: { active: true } }) : 0,
     ]);
     const lowStockItems = allWarehouseItems.filter(item => item.currentQty < item.parLevel).length;
-    stats = { totalOrders, pendingOrders, lowStockItems, activeUsers };
+    stats = { ...stats, totalOrders, pendingOrders, lowStockItems, activeUsers };
   } else if (role === 'FIELD') {
     const [totalOrders, pendingOrders] = await Promise.all([
       prisma.order.count({ where: { userId: session.user.id } }),
@@ -46,8 +63,8 @@ export default async function DashboardPage() {
         </h1>
         <p className="mt-2 text-gray-300">
           {role === 'ADMIN' && 'Manage your warehouse, orders, and users from here.'}
-          {role === 'WAREHOUSE' && 'Manage warehouse inventory and fulfill orders.'}
-          {role === 'FIELD' && 'Submit orders and manage your vehicle inventory.'}
+          {role === 'WAREHOUSE' && `Manage warehouse inventory and fulfill orders${stats.branchName ? ` - ${stats.branchName} Branch` : ''}.`}
+          {role === 'FIELD' && `Submit orders and manage your vehicle inventory${stats.branchName ? ` - ${stats.branchName} Branch` : ''}.`}
         </p>
       </div>
 

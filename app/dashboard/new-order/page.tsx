@@ -9,6 +9,7 @@ interface WarehouseItem {
   category: string;
   currentQty: number;
   unit: string;
+  branchId: string | null;
 }
 
 interface OrderItem {
@@ -16,11 +17,19 @@ interface OrderItem {
   requestedQty: number;
 }
 
+interface Branch {
+  id: string;
+  name: string;
+  city: string;
+}
+
 export default function NewOrderPage() {
   const router = useRouter();
   const [items, setItems] = useState<WarehouseItem[]>([]);
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedBranch, setSelectedBranch] = useState<string>('');
   const [orderItems, setOrderItems] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
@@ -28,13 +37,31 @@ export default function NewOrderPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    fetchBranches();
     fetchInventory();
   }, []);
+
+  useEffect(() => {
+    fetchInventory();
+  }, [selectedBranch]);
+
+  const fetchBranches = async () => {
+    try {
+      const response = await fetch('/api/branches');
+      const data = await response.json();
+      setBranches(data.branches || []);
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
 
   const fetchInventory = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/inventory');
+      const url = selectedBranch
+        ? `/api/inventory?branchId=${selectedBranch}`
+        : '/api/inventory';
+      const response = await fetch(url);
       const data = await response.json();
       setItems(data.inventory);
       setCategories(data.categories);
@@ -74,7 +101,7 @@ export default function NewOrderPage() {
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, notes }),
+        body: JSON.stringify({ items, notes, branchId: selectedBranch || null }),
       });
 
       if (response.ok) {
@@ -119,6 +146,27 @@ export default function NewOrderPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="card mb-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Branch
+                </label>
+                <select
+                  value={selectedBranch}
+                  onChange={(e) => {
+                    setSelectedBranch(e.target.value);
+                    setOrderItems({});
+                  }}
+                  className="input-field mb-4"
+                >
+                  <option value="">All Branches</option>
+                  {branches.map((branch) => (
+                    <option key={branch.id} value={branch.id}>
+                      {branch.name} - {branch.city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="mb-4">
                 <input
                   type="text"

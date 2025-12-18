@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: session.user.id,
         vehicleNumber: session.user.vehicleNumber,
+        branchId: session.user.branchId || null,
         weekEnding: new Date(weekEnding),
         items: {
           create: items.map((item: any) => ({
@@ -91,6 +92,7 @@ export async function POST(request: NextRequest) {
             orderNumber,
             userId: session.user.id,
             vehicleNumber: session.user.vehicleNumber,
+            branchId: session.user.branchId || null,
             orderType: 'WEEKLY_STOCK',
             vehicleStockId: vehicleStock.id,
             items: {

@@ -9,7 +9,13 @@ interface Order {
   orderType: string;
   status: string;
   notes: string | null;
+  branchId: string | null;
   createdAt: string;
+  branch?: {
+    id: string;
+    name: string;
+    city: string;
+  };
   items: {
     id: string;
     requestedQty: number;
@@ -123,6 +129,7 @@ export default function MyOrdersPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
                     Order #{order.orderNumber}
+                    {order.branch && <span className="text-tron-red ml-2 text-base font-normal">• {order.branch.name}</span>}
                   </h3>
                   <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
                 </div>

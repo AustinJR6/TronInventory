@@ -16,8 +16,11 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
+    const branchId = searchParams.get('branchId');
 
-    const where = category ? { category } : {};
+    const where: any = {};
+    if (category) where.category = category;
+    if (branchId) where.branchId = branchId;
 
     const inventory = await prisma.warehouseInventory.findMany({
       where,
@@ -49,9 +52,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { itemName, category, parLevel, currentQty, unit } = body;
+    const { itemName, category, parLevel, currentQty, unit, branchId } = body;
 
-    if (!itemName || !category || !unit || parLevel === undefined || currentQty === undefined) {
+    if (!itemName || !category || !unit || !branchId || parLevel === undefined || currentQty === undefined) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -62,6 +65,7 @@ export async function POST(request: NextRequest) {
         parLevel,
         currentQty,
         unit,
+        branchId,
       },
     });
 
