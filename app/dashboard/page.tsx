@@ -21,12 +21,13 @@ export default async function DashboardPage() {
   };
 
   if (role === 'ADMIN' || role === 'WAREHOUSE') {
-    const [totalOrders, pendingOrders, lowStockItems, activeUsers] = await Promise.all([
+    const [totalOrders, pendingOrders, allWarehouseItems, activeUsers] = await Promise.all([
       prisma.order.count(),
       prisma.order.count({ where: { status: { in: ['SUBMITTED', 'IN_PROGRESS'] } } }),
-      prisma.warehouseInventory.count({ where: { currentQty: { lt: prisma.warehouseInventory.fields.parLevel } } }),
+      prisma.warehouseInventory.findMany({ select: { currentQty: true, parLevel: true } }),
       role === 'ADMIN' ? prisma.user.count({ where: { active: true } }) : 0,
     ]);
+    const lowStockItems = allWarehouseItems.filter(item => item.currentQty < item.parLevel).length;
     stats = { totalOrders, pendingOrders, lowStockItems, activeUsers };
   } else if (role === 'FIELD') {
     const [totalOrders, pendingOrders] = await Promise.all([
