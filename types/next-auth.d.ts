@@ -8,12 +8,14 @@ declare module 'next-auth' {
       name: string;
       role: string;
       vehicleNumber?: string;
+      branchId?: string | null;
     };
   }
 
   interface User {
     role: string;
     vehicleNumber?: string;
+    branchId?: string | null;
   }
 }
 
@@ -21,5 +23,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     role: string;
     vehicleNumber?: string;
+    branchId?: string | null;
   }
 }

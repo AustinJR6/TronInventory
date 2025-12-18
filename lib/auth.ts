@@ -41,6 +41,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           vehicleNumber: user.vehicleNumber || undefined,
+          branchId: user.branchId || null,
         };
       },
     }),
@@ -51,6 +52,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.vehicleNumber = user.vehicleNumber;
+        token.branchId = user.branchId;
       }
       return token;
     },
@@ -59,6 +61,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub as string;
         session.user.role = token.role as string;
         session.user.vehicleNumber = (token.vehicleNumber as string | undefined) || undefined;
+        session.user.branchId = (token.branchId as string | null) || null;
       }
       return session;
     },
