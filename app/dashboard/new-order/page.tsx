@@ -82,11 +82,13 @@ export default function NewOrderPage() {
         alert(data.message);
         router.push('/dashboard/my-orders');
       } else {
-        alert('Failed to create order');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Server error:', errorData);
+        alert(`Failed to create order: ${errorData.error || errorData.details || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error creating order:', error);
-      alert('An error occurred while creating the order');
+      alert(`An error occurred while creating the order: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSubmitting(false);
     }
