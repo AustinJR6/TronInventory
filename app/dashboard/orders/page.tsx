@@ -256,7 +256,7 @@ export default function OrdersPage() {
               </div>
 
               <div className="flex justify-end gap-2">
-                {order.status === 'SUBMITTED' && (
+                {(order.status === 'SUBMITTED' || order.status === 'IN_PROGRESS') && (
                   <>
                     {expandedOrder === order.id ? (
                       <>
@@ -275,12 +275,14 @@ export default function OrdersPage() {
                       </>
                     ) : (
                       <>
-                        <button
-                          onClick={() => handleStatusChange(order.id, 'IN_PROGRESS')}
-                          className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors"
-                        >
-                          Mark In Progress
-                        </button>
+                        {order.status === 'SUBMITTED' && (
+                          <button
+                            onClick={() => handleStatusChange(order.id, 'IN_PROGRESS')}
+                            className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg font-medium transition-colors"
+                          >
+                            Mark In Progress
+                          </button>
+                        )}
                         <button
                           onClick={() => setExpandedOrder(order.id)}
                           className="btn-primary"
@@ -290,14 +292,6 @@ export default function OrdersPage() {
                       </>
                     )}
                   </>
-                )}
-                {order.status === 'IN_PROGRESS' && (
-                  <button
-                    onClick={() => setExpandedOrder(order.id)}
-                    className="btn-primary"
-                  >
-                    Pull Items
-                  </button>
                 )}
                 {order.status === 'READY' && (
                   <button
