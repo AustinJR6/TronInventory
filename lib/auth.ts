@@ -48,6 +48,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id;
         token.role = user.role;
         token.vehicleNumber = user.vehicleNumber;
       }
@@ -55,6 +56,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session?.user) {
+        session.user.id = token.sub as string;
         session.user.role = token.role as string;
         session.user.vehicleNumber = (token.vehicleNumber as string | undefined) || undefined;
       }
