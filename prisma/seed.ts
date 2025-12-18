@@ -6,20 +6,34 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  // Create default admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10);
+  // Create main admin user
+  const hashedPassword = await bcrypt.hash('Solar2025!', 10);
   const admin = await prisma.user.upsert({
-    where: { email: 'admin@tronsolar.com' },
-    update: {},
+    where: { email: 'raustinj39@gmail.com' },
+    update: {
+      password: hashedPassword,
+      active: true,
+    },
     create: {
-      email: 'admin@tronsolar.com',
-      name: 'Admin User',
+      email: 'raustinj39@gmail.com',
+      name: 'Admin',
       password: hashedPassword,
       role: 'ADMIN',
+      active: true,
     },
   });
 
   console.log('Created admin user:', admin.email);
+
+  // Deactivate old admin if exists
+  try {
+    await prisma.user.update({
+      where: { email: 'admin@tronsolar.com' },
+      data: { active: false },
+    });
+  } catch (e) {
+    // Old admin doesn't exist, that's fine
+  }
 
   // Warehouse BOS Inventory Items
   const warehouseItems = [
