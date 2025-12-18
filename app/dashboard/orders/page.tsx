@@ -131,8 +131,8 @@ export default function OrdersPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
-        <p className="mt-2 text-gray-600">Process and fulfill field worker orders</p>
+        <h1 className="text-3xl font-bold text-white">Order Management</h1>
+        <p className="mt-2 text-gray-300">Process and fulfill field worker orders</p>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
@@ -140,8 +140,8 @@ export default function OrdersPage() {
           onClick={() => setSelectedStatus('')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             selectedStatus === ''
-              ? 'bg-tron-red text-white'
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'bg-tron-orange text-white'
+              : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
           }`}
         >
           All Orders
@@ -152,8 +152,8 @@ export default function OrdersPage() {
             onClick={() => setSelectedStatus(status)}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               selectedStatus === status
-                ? 'bg-tron-red text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'bg-tron-orange text-white'
+                : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
             }`}
           >
             {status.replace('_', ' ')}
@@ -163,7 +163,7 @@ export default function OrdersPage() {
 
       {orders.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-gray-500">No orders found</p>
+          <p className="text-gray-400">No orders found</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -171,67 +171,67 @@ export default function OrdersPage() {
             <div key={order.id} className="card">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-white">
                     Order #{order.orderNumber}
                   </h3>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-gray-300 mt-1">
                     {order.user.name} - Vehicle {order.vehicleNumber}
                   </p>
-                  <p className="text-xs text-gray-500">{formatDate(order.createdAt)}</p>
+                  <p className="text-xs text-gray-400">{formatDate(order.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`badge ${getStatusBadge(order.status)}`}>
                     {order.status.replace('_', ' ')}
                   </span>
-                  <span className="text-xs px-2 py-1 bg-gray-100 rounded">
+                  <span className="text-xs px-2 py-1 bg-tron-black text-gray-300 rounded border border-tron-orange/30">
                     {order.orderType.replace('_', ' ')}
                   </span>
                 </div>
               </div>
 
               {order.notes && (
-                <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-900">
+                <div className="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+                  <p className="text-sm text-blue-300">
                     <span className="font-medium">Notes:</span> {order.notes}
                   </p>
                 </div>
               )}
 
               <div className="overflow-x-auto mb-4">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-tron-orange/20">
+                  <thead className="bg-tron-black">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      <th className="px-4 py-2 text-left text-xs font-medium text-tron-orange uppercase">
                         Item
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      <th className="px-4 py-2 text-left text-xs font-medium text-tron-orange uppercase">
                         Requested
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      <th className="px-4 py-2 text-left text-xs font-medium text-tron-orange uppercase">
                         Available
                       </th>
                       {expandedOrder === order.id && (order.status === 'SUBMITTED' || order.status === 'IN_PROGRESS') && (
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                        <th className="px-4 py-2 text-left text-xs font-medium text-tron-orange uppercase">
                           Pull Qty
                         </th>
                       )}
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-tron-gray-light divide-y divide-tron-orange/20">
                     {order.items.map((item) => (
                       <tr key={item.id}>
-                        <td className="px-4 py-2 text-sm text-gray-900">
+                        <td className="px-4 py-2 text-sm text-white">
                           {item.warehouseItem.itemName}
                         </td>
-                        <td className="px-4 py-2 text-sm text-gray-500">
+                        <td className="px-4 py-2 text-sm text-gray-300">
                           {item.requestedQty} {item.warehouseItem.unit}
                         </td>
-                        <td className="px-4 py-2 text-sm text-gray-900">
+                        <td className="px-4 py-2 text-sm text-white">
                           <span
                             className={
                               item.warehouseItem.currentQty < item.requestedQty
-                                ? 'text-red-600 font-medium'
-                                : 'text-green-600'
+                                ? 'text-red-400 font-medium'
+                                : 'text-green-400'
                             }
                           >
                             {item.warehouseItem.currentQty} {item.warehouseItem.unit}
@@ -245,7 +245,7 @@ export default function OrdersPage() {
                               max={Math.min(item.requestedQty, item.warehouseItem.currentQty)}
                               defaultValue={item.requestedQty}
                               onChange={(e) => setPulledQty(item.id, parseInt(e.target.value) || 0)}
-                              className="w-20 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-tron-red"
+                              className="w-20 px-2 py-1 border border-tron-orange/30 rounded-md focus:ring-2 focus:ring-tron-orange bg-tron-black text-white"
                             />
                           </td>
                         )}
