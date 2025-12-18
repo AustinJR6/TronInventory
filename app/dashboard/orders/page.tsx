@@ -210,7 +210,7 @@ export default function OrdersPage() {
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                         Available
                       </th>
-                      {expandedOrder === order.id && order.status === 'SUBMITTED' && (
+                      {expandedOrder === order.id && (order.status === 'SUBMITTED' || order.status === 'IN_PROGRESS') && (
                         <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                           Pull Qty
                         </th>
@@ -237,7 +237,7 @@ export default function OrdersPage() {
                             {item.warehouseItem.currentQty} {item.warehouseItem.unit}
                           </span>
                         </td>
-                        {expandedOrder === order.id && order.status === 'SUBMITTED' && (
+                        {expandedOrder === order.id && (order.status === 'SUBMITTED' || order.status === 'IN_PROGRESS') && (
                           <td className="px-4 py-2 text-sm">
                             <input
                               type="number"
