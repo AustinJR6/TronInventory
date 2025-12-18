@@ -3,6 +3,7 @@
 import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
 
 interface NavigationProps {
   role: string;
@@ -12,6 +13,20 @@ interface NavigationProps {
 
 export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
   const pathname = usePathname();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const navItems = {
     ADMIN: [
@@ -64,20 +79,47 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
               ))}
             </div>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-right">
-              <p className="font-medium text-gray-900">{userName}</p>
-              <p className="text-gray-500 text-xs">
-                {role}
-                {vehicleNumber && ` - Vehicle ${vehicleNumber}`}
-              </p>
+          <div className="flex items-center">
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <div className="text-sm text-right">
+                  <p className="font-medium text-gray-900">{userName}</p>
+                  <p className="text-gray-500 text-xs">
+                    {role}
+                    {vehicleNumber && ` - Vehicle ${vehicleNumber}`}
+                  </p>
+                </div>
+                <svg
+                  className={`w-4 h-4 text-gray-500 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                  <Link
+                    href="/dashboard/update-password"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setIsProfileOpen(false)}
+                  >
+                    Update Password
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/login' })}
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
-            <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Sign Out
-            </button>
           </div>
         </div>
       </div>

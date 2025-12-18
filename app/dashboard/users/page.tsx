@@ -19,7 +19,7 @@ export default function UsersPage() {
   const [formData, setFormData] = useState({
     email: '',
     name: '',
-    password: '',
+    password: 'Solar2025!',
     role: 'FIELD',
     vehicleNumber: '',
   });
@@ -58,7 +58,7 @@ export default function UsersPage() {
         setFormData({
           email: '',
           name: '',
-          password: '',
+          password: 'Solar2025!',
           role: 'FIELD',
           vehicleNumber: '',
         });
@@ -155,8 +155,11 @@ export default function UsersPage() {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="input-field"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Default: Solar2025! (User will be prompted to change on first login)
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
