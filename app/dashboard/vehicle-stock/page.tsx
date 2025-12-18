@@ -98,11 +98,13 @@ export default function VehicleStockPage() {
           router.push('/dashboard');
         }
       } else {
-        alert('Failed to submit vehicle stock');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Server error:', errorData);
+        alert(`Failed to submit vehicle stock: ${errorData.error || errorData.details || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error submitting vehicle stock:', error);
-      alert('An error occurred while submitting');
+      alert(`An error occurred while submitting: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSubmitting(false);
     }

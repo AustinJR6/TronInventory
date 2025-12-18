@@ -7,9 +7,12 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || !['ADMIN', 'WAREHOUSE'].includes(session.user.role)) {
+    if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // All authenticated users can read inventory
+    // FIELD workers need this to create orders
 
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get('category');
