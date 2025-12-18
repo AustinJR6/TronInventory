@@ -7,8 +7,8 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Allow login page and NextAuth API routes
-  if (pathname === '/login' || pathname.startsWith('/api/auth')) {
+  // Allow login page, NextAuth API routes, and seed endpoint
+  if (pathname === '/login' || pathname.startsWith('/api/auth') || pathname === '/api/seed') {
     return NextResponse.next();
   }
 
