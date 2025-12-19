@@ -73,6 +73,10 @@ async function main() {
     where: { email: 'raustinj39@gmail.com' },
     update: {
       password: tronAdminPassword,
+      companyId: tronSolar.id,
+      branchId: tronBranch.id,
+      role: 'ADMIN',
+      active: true,
     },
     create: {
       companyId: tronSolar.id,
@@ -303,6 +307,10 @@ async function main() {
     where: { email: 'tennant2@outlook.com' },
     update: {
       password: testAdminPassword,
+      companyId: testCompany.id,
+      branchId: testBranch.id,
+      role: 'ADMIN',
+      active: true,
     },
     create: {
       companyId: testCompany.id,

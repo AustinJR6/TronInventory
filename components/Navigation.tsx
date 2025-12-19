@@ -4,7 +4,6 @@ import { signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
 import { useCompany } from '@/hooks/useCompany';
 
 interface NavigationProps {
@@ -80,19 +79,11 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
                   src={branding.logoUrl}
                   alt={`${branding.companyName} Logo`}
                   className="h-12 w-auto max-w-[120px] object-contain"
-                  onError={(e) => {
-                    // Fallback to default logo on error
-                    e.currentTarget.src = '/tron-logo.webp';
-                  }}
                 />
               ) : (
-                <Image
-                  src="/tron-logo.webp"
-                  alt={branding.appName}
-                  width={120}
-                  height={48}
-                  className="h-12 w-auto"
-                />
+                <div className="text-xl font-bold text-white">
+                  {branding.appName || branding.companyName}
+                </div>
               )}
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

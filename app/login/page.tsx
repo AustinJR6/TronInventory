@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,17 +40,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-tron-black px-4">
       <div className="max-w-md w-full space-y-8 bg-tron-gray p-8 rounded-xl shadow-lg border border-tron-orange/30">
         <div>
-          <div className="flex justify-center mb-4">
-            <Image
-              src="/tron-logo.webp"
-              alt="Tron Solar Logo"
-              width={180}
-              height={72}
-              className="h-18 w-auto"
-            />
-          </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Tron Solar Inventory
+            Inventory Management
           </h2>
           <p className="mt-2 text-center text-sm text-gray-300">
             Sign in to access the inventory system
