@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { useCompany } from '@/hooks/useCompany';
 
 interface NavigationProps {
   role: string;
@@ -16,6 +17,7 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
   const pathname = usePathname();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { branding } = useCompany();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -29,12 +31,23 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Apply dynamic CSS variables for branding
+  useEffect(() => {
+    if (branding.primaryColor) {
+      document.documentElement.style.setProperty('--color-primary', branding.primaryColor);
+    } else {
+      // Fallback to default Tron orange if no primary color set
+      document.documentElement.style.setProperty('--color-primary', '#FF6B35');
+    }
+  }, [branding.primaryColor]);
+
   const navItems = {
     ADMIN: [
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/dashboard/warehouse', label: 'Warehouse Inventory' },
       { href: '/dashboard/orders', label: 'Orders' },
       { href: '/dashboard/users', label: 'User Management' },
+      { href: '/dashboard/settings', label: 'Settings' },
     ],
     WAREHOUSE: [
       { href: '/dashboard', label: 'Dashboard' },
@@ -51,19 +64,36 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
 
   const items = navItems[role as keyof typeof navItems] || [];
 
+  // Use CSS variable for primary color
+  const primaryColorClass = 'text-[var(--color-primary,#FF6B35)]';
+  const primaryBorderClass = 'border-[var(--color-primary,#FF6B35)]';
+  const primaryBorderHoverClass = 'hover:border-[var(--color-primary,#FF6B35)]/50';
+
   return (
     <nav className="bg-tron-black shadow-lg border-b border-tron-orange/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Image
-                src="/tron-logo.webp"
-                alt="Tron Solar Logo"
-                width={120}
-                height={48}
-                className="h-12 w-auto"
-              />
+              {branding.logoUrl ? (
+                <img
+                  src={branding.logoUrl}
+                  alt={`${branding.companyName} Logo`}
+                  className="h-12 w-auto max-w-[120px] object-contain"
+                  onError={(e) => {
+                    // Fallback to default logo on error
+                    e.currentTarget.src = '/tron-logo.webp';
+                  }}
+                />
+              ) : (
+                <Image
+                  src="/tron-logo.webp"
+                  alt={branding.appName}
+                  width={120}
+                  height={48}
+                  className="h-12 w-auto"
+                />
+              )}
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {items.map((item) => (
@@ -72,8 +102,8 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
                   href={item.href}
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
                     pathname === item.href
-                      ? 'border-tron-orange text-tron-orange'
-                      : 'border-transparent text-gray-300 hover:border-tron-orange/50 hover:text-white'
+                      ? `${primaryBorderClass} ${primaryColorClass}`
+                      : `border-transparent text-gray-300 ${primaryBorderHoverClass} hover:text-white`
                   }`}
                 >
                   {item.label}
@@ -89,13 +119,13 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
               >
                 <div className="text-sm text-right">
                   <p className="font-medium text-white">{userName}</p>
-                  <p className="text-tron-orange text-xs">
+                  <p className={`text-xs ${primaryColorClass}`}>
                     {role}
                     {vehicleNumber && ` - Vehicle ${vehicleNumber}`}
                   </p>
                 </div>
                 <svg
-                  className={`w-4 h-4 text-tron-orange transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 ${primaryColorClass} transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -106,9 +136,18 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
 
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-tron-gray rounded-md shadow-lg py-1 z-50 border border-tron-orange/30">
+                  {role === 'ADMIN' && (
+                    <Link
+                      href="/dashboard/settings"
+                      className={`block px-4 py-2 text-sm text-gray-200 hover:bg-tron-gray-light hover:${primaryColorClass}`}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      Company Settings
+                    </Link>
+                  )}
                   <Link
                     href="/dashboard/update-password"
-                    className="block px-4 py-2 text-sm text-gray-200 hover:bg-tron-gray-light hover:text-tron-orange"
+                    className={`block px-4 py-2 text-sm text-gray-200 hover:bg-tron-gray-light hover:${primaryColorClass}`}
                     onClick={() => setIsProfileOpen(false)}
                   >
                     Update Password
@@ -135,8 +174,8 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
               href={item.href}
               className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
                 pathname === item.href
-                  ? 'border-tron-orange bg-tron-gray text-tron-orange'
-                  : 'border-transparent text-gray-300 hover:bg-tron-gray hover:border-tron-orange/50 hover:text-white'
+                  ? `${primaryBorderClass} bg-tron-gray ${primaryColorClass}`
+                  : `border-transparent text-gray-300 hover:bg-tron-gray ${primaryBorderHoverClass} hover:text-white`
               }`}
             >
               {item.label}

@@ -1,23 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { withCompanyScope } from '@/lib/prisma-middleware';
+import { enforceAll } from '@/lib/enforcement';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Enforce authentication and get scoped context
+    const { companyId, userId } = await enforceAll(session);
+
+    // Use company-scoped Prisma client
+    const scopedPrisma = withCompanyScope(companyId);
 
     const body = await request.json();
     const { currentPassword, newPassword } = body;
 
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+    // Get user from database (scoped to company)
+    const user = await scopedPrisma.user.findUnique({
+      where: { id: userId },
     });
 
     if (!user) {
@@ -34,18 +37,19 @@ export async function POST(request: NextRequest) {
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password
-    await prisma.user.update({
-      where: { id: session.user.id },
+    // Update password (scoped to company)
+    await scopedPrisma.user.update({
+      where: { id: userId },
       data: { password: hashedPassword },
     });
 
     return NextResponse.json({ message: 'Password updated successfully' });
   } catch (error: any) {
     console.error('Error updating password:', error);
+    const status = error.message?.includes('Authentication required') ? 401 : 500;
     return NextResponse.json({
-      error: 'Internal server error',
+      error: error.message || 'Internal server error',
       details: error.message
-    }, { status: 500 });
+    }, { status });
   }
 }

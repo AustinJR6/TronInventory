@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { withCompanyScope } from '@/lib/prisma-middleware';
+import { enforceAll } from '@/lib/enforcement';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Enforce authentication and get scoped context
+    const { companyId } = await enforceAll(session);
+
+    // Use company-scoped Prisma client
+    const scopedPrisma = withCompanyScope(companyId);
 
     // All authenticated users can read inventory
     // FIELD workers need this to create orders
@@ -22,12 +25,12 @@ export async function GET(request: NextRequest) {
     if (category) where.category = category;
     if (branchId) where.branchId = branchId;
 
-    const inventory = await prisma.warehouseInventory.findMany({
+    const inventory = await scopedPrisma.warehouseInventory.findMany({
       where,
       orderBy: [{ category: 'asc' }, { itemName: 'asc' }],
     });
 
-    const categories = await prisma.warehouseInventory.findMany({
+    const categories = await scopedPrisma.warehouseInventory.findMany({
       select: { category: true },
       distinct: ['category'],
       orderBy: { category: 'asc' },
@@ -37,9 +40,10 @@ export async function GET(request: NextRequest) {
       inventory,
       categories: categories.map((c) => c.category),
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching inventory:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const status = error.message?.includes('Authentication required') ? 401 : 500;
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status });
   }
 }
 
@@ -47,9 +51,13 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || !['ADMIN', 'WAREHOUSE'].includes(session.user.role)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Enforce authentication, role, and get scoped context
+    const { companyId } = await enforceAll(session, {
+      role: ['ADMIN', 'WAREHOUSE'],
+    });
+
+    // Use company-scoped Prisma client
+    const scopedPrisma = withCompanyScope(companyId);
 
     const body = await request.json();
     const { itemName, category, parLevel, currentQty, unit, branchId } = body;
@@ -58,7 +66,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const newItem = await prisma.warehouseInventory.create({
+    const newItem = await scopedPrisma.warehouseInventory.create({
       data: {
         itemName,
         category,
@@ -70,9 +78,11 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(newItem);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating inventory item:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const status = error.message?.includes('required') ? 401 :
+                   error.message?.includes('Access denied') ? 403 : 500;
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status });
   }
 }
 
@@ -80,14 +90,18 @@ export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || !['ADMIN', 'WAREHOUSE'].includes(session.user.role)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Enforce authentication, role, and get scoped context
+    const { companyId } = await enforceAll(session, {
+      role: ['ADMIN', 'WAREHOUSE'],
+    });
+
+    // Use company-scoped Prisma client
+    const scopedPrisma = withCompanyScope(companyId);
 
     const body = await request.json();
     const { id, currentQty } = body;
 
-    const updatedItem = await prisma.warehouseInventory.update({
+    const updatedItem = await scopedPrisma.warehouseInventory.update({
       where: { id },
       data: {
         currentQty,
@@ -96,8 +110,10 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json(updatedItem);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating inventory:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const status = error.message?.includes('required') ? 401 :
+                   error.message?.includes('Access denied') ? 403 : 500;
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status });
   }
 }

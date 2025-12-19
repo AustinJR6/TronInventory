@@ -56,6 +56,12 @@ CREATE UNIQUE INDEX "licenses_companyId_key" ON "licenses"("companyId");
 -- AddForeignKey: licenses -> companies
 ALTER TABLE "licenses" ADD CONSTRAINT "licenses_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
+-- AddForeignKey: inventory_transactions -> companies
+ALTER TABLE "inventory_transactions" ADD CONSTRAINT "inventory_transactions_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey: inventory_transactions -> warehouse_inventory
+ALTER TABLE "inventory_transactions" ADD CONSTRAINT "inventory_transactions_itemId_fkey" FOREIGN KEY ("itemId") REFERENCES "warehouse_inventory"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
 -- Step 1: Add companyId column to all tenant tables (nullable first)
 ALTER TABLE "branches" ADD COLUMN "companyId" TEXT;
 ALTER TABLE "users" ADD COLUMN "companyId" TEXT;
@@ -64,8 +70,14 @@ ALTER TABLE "vehicle_inventory_items" ADD COLUMN "companyId" TEXT;
 ALTER TABLE "vehicle_stocks" ADD COLUMN "companyId" TEXT;
 ALTER TABLE "orders" ADD COLUMN "companyId" TEXT;
 
--- Step 2: Create default "Tron Solar" company
--- Note: This will be populated by the data migration script
+-- NOTE: Data migration must be run before proceeding to Step 2
+-- Run: npx ts-node prisma/migrations/migrate-to-multi-tenant.ts
 
--- Step 3: After data migration, make companyId NOT NULL and add foreign keys
--- Note: These will be executed after data backfill in a separate migration
+-- This migration file only creates the schema structure.
+-- The data migration script (migrate-to-multi-tenant.ts) will:
+-- 1. Create "Tron Solar" company
+-- 2. Create default OPS license
+-- 3. Backfill all existing records with Tron Solar companyId
+-- 4. Add NOT NULL constraints
+-- 5. Add foreign key constraints
+-- 6. Update unique constraints to be company-scoped

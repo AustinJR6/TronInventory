@@ -97,6 +97,11 @@ async function main() {
   await prisma.$executeRaw`ALTER TABLE "users" ALTER COLUMN "companyId" SET NOT NULL`;
   await prisma.$executeRaw`ALTER TABLE "users" ADD CONSTRAINT "users_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE CASCADE`;
 
+  // Email remains globally unique (not company-scoped)
+  // Vehicle numbers are company-scoped
+  await prisma.$executeRaw`DROP INDEX IF EXISTS "users_vehicleNumber_key"`;
+  await prisma.$executeRaw`CREATE UNIQUE INDEX "users_companyId_vehicleNumber_key" ON "users"("companyId", "vehicleNumber") WHERE "vehicleNumber" IS NOT NULL`;
+
   await prisma.$executeRaw`ALTER TABLE "warehouse_inventory" ALTER COLUMN "companyId" SET NOT NULL`;
   await prisma.$executeRaw`ALTER TABLE "warehouse_inventory" ADD CONSTRAINT "warehouse_inventory_companyId_fkey" FOREIGN KEY ("companyId") REFERENCES "companies"("id") ON DELETE CASCADE ON UPDATE CASCADE`;
   await prisma.$executeRaw`DROP INDEX IF EXISTS "warehouse_inventory_itemName_branchId_key"`;

@@ -1,24 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { withCompanyScope } from '@/lib/prisma-middleware';
+import { enforceAll } from '@/lib/enforcement';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'FIELD') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // Enforce authentication, role, and get scoped context
+    const { companyId } = await enforceAll(session, {
+      role: 'FIELD',
+    });
 
-    const vehicleItems = await prisma.vehicleInventoryItem.findMany({
+    // Use company-scoped Prisma client
+    const scopedPrisma = withCompanyScope(companyId);
+
+    const vehicleItems = await scopedPrisma.vehicleInventoryItem.findMany({
       orderBy: [{ category: 'asc' }, { itemName: 'asc' }],
     });
 
     return NextResponse.json({ items: vehicleItems });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching vehicle items:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const status = error.message?.includes('required') ? 401 :
+                   error.message?.includes('Access denied') ? 403 : 500;
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status });
   }
 }
 
@@ -26,17 +33,25 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== 'FIELD' || !session.user.vehicleNumber) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Enforce authentication, role, and get scoped context
+    const { companyId, userId } = await enforceAll(session, {
+      role: 'FIELD',
+    });
+
+    if (!session.user.vehicleNumber) {
+      return NextResponse.json({ error: 'Vehicle number required for field users' }, { status: 400 });
     }
+
+    // Use company-scoped Prisma client
+    const scopedPrisma = withCompanyScope(companyId);
 
     const body = await request.json();
     const { weekEnding, items } = body;
 
     // Create vehicle stock record
-    const vehicleStock = await prisma.vehicleStock.create({
+    const vehicleStock = await scopedPrisma.vehicleStock.create({
       data: {
-        userId: session.user.id,
+        userId,
         vehicleNumber: session.user.vehicleNumber,
         branchId: session.user.branchId || null,
         weekEnding: new Date(weekEnding),
@@ -64,14 +79,14 @@ export async function POST(request: NextRequest) {
     );
 
     if (itemsNeedingRestock.length > 0) {
-      // Generate order number
-      const orderCount = await prisma.order.count();
+      // Generate order number (scoped to company)
+      const orderCount = await scopedPrisma.order.count();
       const orderNumber = `ORD-${String(orderCount + 1).padStart(6, '0')}`;
 
-      // Find corresponding warehouse items
+      // Find corresponding warehouse items (already scoped to company)
       const orderItems = await Promise.all(
         itemsNeedingRestock.map(async (stockItem) => {
-          const warehouseItem = await prisma.warehouseInventory.findFirst({
+          const warehouseItem = await scopedPrisma.warehouseInventory.findFirst({
             where: { itemName: stockItem.item.itemName },
           });
 
@@ -87,10 +102,10 @@ export async function POST(request: NextRequest) {
       const validOrderItems = orderItems.filter((item) => item !== null);
 
       if (validOrderItems.length > 0) {
-        const order = await prisma.order.create({
+        const order = await scopedPrisma.order.create({
           data: {
             orderNumber,
-            userId: session.user.id,
+            userId,
             vehicleNumber: session.user.vehicleNumber,
             branchId: session.user.branchId || null,
             orderType: 'WEEKLY_STOCK',
@@ -122,9 +137,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Error creating vehicle stock:', error);
+    const status = error.message?.includes('required') ? 401 :
+                   error.message?.includes('Access denied') ? 403 : 500;
     return NextResponse.json({
-      error: 'Internal server error',
+      error: error.message || 'Internal server error',
       details: error.message || 'Unknown error'
-    }, { status: 500 });
+    }, { status });
   }
 }

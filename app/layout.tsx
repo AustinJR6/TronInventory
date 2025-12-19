@@ -1,3 +1,8 @@
+/**
+ * © 2025 Lysara LLC
+ * Proprietary software. Internal use by licensed parties only.
+ */
+
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';

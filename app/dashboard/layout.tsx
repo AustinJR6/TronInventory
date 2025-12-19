@@ -15,15 +15,22 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-tron-black">
+    <div className="min-h-screen bg-tron-black flex flex-col">
       <Navigation
         role={session.user.role}
         userName={session.user.name}
         vehicleNumber={session.user.vehicleNumber}
       />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {children}
       </main>
+      <footer className="border-t border-gray-800 py-4 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-xs text-gray-500 text-center">
+            © 2025 Lysara LLC. All rights reserved. Licensed software. Unauthorized use or distribution prohibited.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

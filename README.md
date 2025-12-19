@@ -224,4 +224,15 @@ For issues or questions, contact your system administrator.
 
 ## License
 
-Proprietary - Tron Solar Internal Use Only
+Proprietary - Internal Use Only
+
+---
+
+## Ownership & Copyright
+
+**© 2025 Lysara LLC**
+
+This software is proprietary and confidential.
+Developed and maintained by Lysara LLC.
+
+All rights reserved. This software is licensed to authorized parties only. Unauthorized copying, modification, distribution, or use is strictly prohibited.
