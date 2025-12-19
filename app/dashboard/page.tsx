@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { withCompanyScope } from '@/lib/prisma-middleware';
+import { enforceAll } from '@/lib/enforcement';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -9,6 +10,10 @@ export default async function DashboardPage() {
   if (!session) {
     return null;
   }
+
+  // Enforce authentication and get scoped context
+  const { companyId } = await enforceAll(session);
+  const scopedPrisma = withCompanyScope(companyId);
 
   const role = session.user.role;
   const userBranchId = session.user.branchId;
@@ -24,7 +29,7 @@ export default async function DashboardPage() {
 
   // Get user's branch info if available
   if (userBranchId) {
-    const branch = await prisma.branch.findUnique({
+    const branch = await scopedPrisma.branch.findUnique({
       where: { id: userBranchId },
       select: { name: true },
     });
@@ -36,20 +41,20 @@ export default async function DashboardPage() {
     const branchFilter = role === 'WAREHOUSE' && userBranchId ? { branchId: userBranchId } : {};
 
     const [totalOrders, pendingOrders, allWarehouseItems, activeUsers] = await Promise.all([
-      prisma.order.count({ where: branchFilter }),
-      prisma.order.count({ where: { ...branchFilter, status: { in: ['SUBMITTED', 'IN_PROGRESS'] } } }),
-      prisma.warehouseInventory.findMany({
+      scopedPrisma.order.count({ where: branchFilter }),
+      scopedPrisma.order.count({ where: { ...branchFilter, status: { in: ['SUBMITTED', 'IN_PROGRESS'] } } }),
+      scopedPrisma.warehouseInventory.findMany({
         where: branchFilter,
         select: { currentQty: true, parLevel: true }
       }),
-      role === 'ADMIN' ? prisma.user.count({ where: { active: true } }) : 0,
+      role === 'ADMIN' ? scopedPrisma.user.count({ where: { active: true } }) : 0,
     ]);
     const lowStockItems = allWarehouseItems.filter(item => item.currentQty < item.parLevel).length;
     stats = { ...stats, totalOrders, pendingOrders, lowStockItems, activeUsers };
   } else if (role === 'FIELD') {
     const [totalOrders, pendingOrders] = await Promise.all([
-      prisma.order.count({ where: { userId: session.user.id } }),
-      prisma.order.count({ where: { userId: session.user.id, status: { in: ['SUBMITTED', 'IN_PROGRESS'] } } }),
+      scopedPrisma.order.count({ where: { userId: session.user.id } }),
+      scopedPrisma.order.count({ where: { userId: session.user.id, status: { in: ['SUBMITTED', 'IN_PROGRESS'] } } }),
     ]);
     stats.totalOrders = totalOrders;
     stats.pendingOrders = pendingOrders;
