@@ -9,6 +9,7 @@ declare module 'next-auth' {
       role: string;
       vehicleNumber?: string;
       branchId?: string | null;
+      companyId: string;
     };
   }
 
@@ -16,6 +17,7 @@ declare module 'next-auth' {
     role: string;
     vehicleNumber?: string;
     branchId?: string | null;
+    companyId: string;
   }
 }
 
@@ -24,5 +26,6 @@ declare module 'next-auth/jwt' {
     role: string;
     vehicleNumber?: string;
     branchId?: string | null;
+    companyId: string;
   }
 }

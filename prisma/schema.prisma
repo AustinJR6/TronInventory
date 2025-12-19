@@ -27,36 +27,93 @@ enum OrderType {
   TRANSFER
 }
 
-model Branch {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  city          String
-  address       String?
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+enum LicenseStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}
 
+enum LicenseTier {
+  CORE
+  OPS
+  OPS_SCAN
+  OPS_SCAN_PO
+}
+
+model Company {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  logoUrl      String?
+  primaryColor String?
+  appName      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  license               License?
+  users                 User[]
+  branches              Branch[]
+  warehouseInventory    WarehouseInventory[]
+  vehicleInventoryItems VehicleInventoryItem[]
+  vehicleStocks         VehicleStock[]
+  orders                Order[]
+  inventoryTransactions InventoryTransaction[]
+
+  @@map("companies")
+}
+
+model License {
+  id        String        @id @default(cuid())
+  companyId String        @unique
+  status    LicenseStatus @default(TRIAL)
+  tier      LicenseTier   @default(CORE)
+  startsAt  DateTime      @default(now())
+  expiresAt DateTime?
+  notes     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("licenses")
+}
+
+model Branch {
+  id        String   @id @default(cuid())
+  companyId String
+  name      String
+  city      String
+  address   String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company            Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
   users              User[]
   warehouseInventory WarehouseInventory[]
   vehicleStocks      VehicleStock[]
   orders             Order[]
 
+  @@unique([companyId, name])
   @@map("branches")
 }
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
+  id            String   @id @default(cuid())
+  companyId     String
+  email         String   @unique
   name          String
   password      String
   role          UserRole
-  vehicleNumber String?   @unique
+  vehicleNumber String?  @unique
   branchId      String?
-  active        Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  branch        Branch?   @relation(fields: [branchId], references: [id])
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch        Branch?        @relation(fields: [branchId], references: [id])
   orders        Order[]
   vehicleStocks VehicleStock[]
 
@@ -65,6 +122,7 @@ model User {
 
 model WarehouseInventory {
   id          String   @id @default(cuid())
+  companyId   String
   itemName    String
   category    String
   parLevel    Int
@@ -74,86 +132,112 @@ model WarehouseInventory {
   lastUpdated DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  branch      Branch?  @relation(fields: [branchId], references: [id])
-  orderItems  OrderItem[]
+  company               Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch                Branch?                @relation(fields: [branchId], references: [id])
+  orderItems            OrderItem[]
+  inventoryTransactions InventoryTransaction[]
 
-  @@unique([itemName, branchId])
+  @@unique([companyId, itemName, branchId])
   @@map("warehouse_inventory")
 }
 
 model VehicleInventoryItem {
-  id       String @id @default(cuid())
-  itemName String @unique
-  category String
-  parLevel Int
-  unit     String
+  id        String @id @default(cuid())
+  companyId String
+  itemName  String
+  category  String
+  parLevel  Int
+  unit      String
 
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
   vehicleStockItems VehicleStockItem[]
 
+  @@unique([companyId, itemName])
   @@map("vehicle_inventory_items")
 }
 
 model VehicleStock {
   id            String   @id @default(cuid())
+  companyId     String
   userId        String
   vehicleNumber String
   branchId      String?
   weekEnding    DateTime
   submittedAt   DateTime @default(now())
 
-  user          User     @relation(fields: [userId], references: [id])
-  branch        Branch?  @relation(fields: [branchId], references: [id])
-  items         VehicleStockItem[]
+  company        Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user           User               @relation(fields: [userId], references: [id])
+  branch         Branch?            @relation(fields: [branchId], references: [id])
+  items          VehicleStockItem[]
   generatedOrder Order?
 
   @@map("vehicle_stocks")
 }
 
 model VehicleStockItem {
-  id              String   @id @default(cuid())
-  vehicleStockId  String
-  itemId          String
-  expectedQty     Int
-  actualQty       Int
-  difference      Int
+  id             String @id @default(cuid())
+  vehicleStockId String
+  itemId         String
+  expectedQty    Int
+  actualQty      Int
+  difference     Int
 
-  vehicleStock    VehicleStock @relation(fields: [vehicleStockId], references: [id], onDelete: Cascade)
-  item            VehicleInventoryItem @relation(fields: [itemId], references: [id])
+  vehicleStock VehicleStock         @relation(fields: [vehicleStockId], references: [id], onDelete: Cascade)
+  item         VehicleInventoryItem @relation(fields: [itemId], references: [id])
 
   @@map("vehicle_stock_items")
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
-  userId          String
-  vehicleNumber   String
-  branchId        String?
-  orderType       OrderType
-  status          OrderStatus @default(SUBMITTED)
-  notes           String?
-  vehicleStockId  String?     @unique
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  completedAt     DateTime?
+  id             String      @id @default(cuid())
+  companyId      String
+  orderNumber    String
+  userId         String
+  vehicleNumber  String
+  branchId       String?
+  orderType      OrderType
+  status         OrderStatus @default(SUBMITTED)
+  notes          String?
+  vehicleStockId String?     @unique
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  completedAt    DateTime?
 
-  user            User        @relation(fields: [userId], references: [id])
-  branch          Branch?     @relation(fields: [branchId], references: [id])
-  vehicleStock    VehicleStock? @relation(fields: [vehicleStockId], references: [id])
-  items           OrderItem[]
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id])
+  branch       Branch?       @relation(fields: [branchId], references: [id])
+  vehicleStock VehicleStock? @relation(fields: [vehicleStockId], references: [id])
+  items        OrderItem[]
 
+  @@unique([companyId, orderNumber])
   @@map("orders")
 }
 
 model OrderItem {
-  id                  String   @id @default(cuid())
-  orderId             String
-  warehouseItemId     String
-  requestedQty        Int
-  pulledQty           Int      @default(0)
+  id              String @id @default(cuid())
+  orderId         String
+  warehouseItemId String
+  requestedQty    Int
+  pulledQty       Int    @default(0)
 
-  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  warehouseItem       WarehouseInventory @relation(fields: [warehouseItemId], references: [id])
+  order         Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  warehouseItem WarehouseInventory @relation(fields: [warehouseItemId], references: [id])
 
   @@map("order_items")
+}
+
+model InventoryTransaction {
+  id        String   @id @default(cuid())
+  companyId String
+  itemId    String
+  delta     Int
+  reason    String?
+  source    String   @default("manual")
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  company Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  item    WarehouseInventory @relation(fields: [itemId], references: [id])
+
+  @@map("inventory_transactions")
 }

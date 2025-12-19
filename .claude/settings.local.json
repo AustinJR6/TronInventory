@@ -26,7 +26,8 @@
       "Bash(cp:*)",
       "Bash(mkdir:*)",
       "Bash(npx prisma db push:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(npx prisma format)"
     ],
     "deny": [],
     "ask": []
