@@ -45,6 +45,7 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/dashboard/warehouse', label: 'Warehouse Inventory' },
       { href: '/dashboard/orders', label: 'Orders' },
+      { href: '/dashboard/branches', label: 'Branches' },
       { href: '/dashboard/users', label: 'User Management' },
       { href: '/dashboard/settings', label: 'Settings' },
     ],
