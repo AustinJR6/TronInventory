@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
       role: 'FIELD',
     });
 
-    if (!session.user.vehicleNumber) {
+    if (!session?.user?.vehicleNumber) {
       return NextResponse.json({ error: 'Vehicle number required for field users' }, { status: 400 });
     }
 

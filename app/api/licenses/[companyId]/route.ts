@@ -11,7 +11,7 @@ import { enforceAll } from '@/lib/enforcement';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { companyId: string } }
+  { params }: { params: Promise<{ companyId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -19,8 +19,11 @@ export async function GET(
     // Enforce authentication
     const { companyId } = await enforceAll(session);
 
+    // Await params (Next.js 15+)
+    const { companyId: paramCompanyId } = await params;
+
     // Validate user can only access their own company's license
-    if (params.companyId !== companyId) {
+    if (paramCompanyId !== companyId) {
       return NextResponse.json(
         { error: 'Access denied. You can only view your own company license.' },
         { status: 403 }

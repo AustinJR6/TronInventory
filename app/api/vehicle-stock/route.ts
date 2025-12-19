@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       role: 'FIELD',
     });
 
-    if (!session.user.vehicleNumber) {
+    if (!session?.user?.vehicleNumber) {
       return NextResponse.json({ error: 'Vehicle number required for field users' }, { status: 400 });
     }
 
@@ -52,11 +52,11 @@ export async function POST(request: NextRequest) {
     const vehicleStock = await scopedPrisma.vehicleStock.create({
       data: {
         userId,
-        vehicleNumber: session.user.vehicleNumber,
-        branchId: session.user.branchId || null,
+        vehicleNumber: session?.user?.vehicleNumber,
+        branchId: session?.user?.branchId || null,
         weekEnding: new Date(weekEnding),
         items: {
-          create: items.map((item: any) => ({
+          create: items.map((item: { itemId: string; expectedQty: number; actualQty: number }) => ({
             itemId: item.itemId,
             expectedQty: item.expectedQty,
             actualQty: item.actualQty,
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     // Generate order for items that need restocking
     const itemsNeedingRestock = vehicleStock.items.filter(
-      (item) => item.difference > 0
+      (item: { difference: number }) => item.difference > 0
     );
 
     if (itemsNeedingRestock.length > 0) {
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
       // Find corresponding warehouse items (already scoped to company)
       const orderItems = await Promise.all(
-        itemsNeedingRestock.map(async (stockItem) => {
+        itemsNeedingRestock.map(async (stockItem: { item: { itemName: string }; difference: number }) => {
           const warehouseItem = await scopedPrisma.warehouseInventory.findFirst({
             where: { itemName: stockItem.item.itemName },
           });
@@ -106,8 +106,8 @@ export async function POST(request: NextRequest) {
           data: {
             orderNumber,
             userId,
-            vehicleNumber: session.user.vehicleNumber,
-            branchId: session.user.branchId || null,
+            vehicleNumber: session?.user?.vehicleNumber,
+            branchId: session?.user?.branchId || null,
             orderType: 'WEEKLY_STOCK',
             vehicleStockId: vehicleStock.id,
             items: {

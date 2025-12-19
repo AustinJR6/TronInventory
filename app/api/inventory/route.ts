@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       inventory,
-      categories: categories.map((c) => c.category),
+      categories: categories.map((c: { category: string }) => c.category),
     });
   } catch (error: any) {
     console.error('Error fetching inventory:', error);

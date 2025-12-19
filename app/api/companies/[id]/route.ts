@@ -11,7 +11,7 @@ import { enforceAll } from '@/lib/enforcement';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -19,8 +19,11 @@ export async function GET(
     // Enforce authentication
     const { companyId } = await enforceAll(session);
 
+    // Await params (Next.js 15+)
+    const { id } = await params;
+
     // Validate user can only access their own company
-    if (params.id !== companyId) {
+    if (id !== companyId) {
       return NextResponse.json(
         { error: 'Access denied. You can only view your own company.' },
         { status: 403 }
@@ -64,7 +67,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -74,8 +77,11 @@ export async function PATCH(
       role: 'ADMIN',
     });
 
+    // Await params (Next.js 15+)
+    const { id } = await params;
+
     // Validate user can only update their own company
-    if (params.id !== companyId) {
+    if (id !== companyId) {
       return NextResponse.json(
         { error: 'Access denied. You can only update your own company.' },
         { status: 403 }
