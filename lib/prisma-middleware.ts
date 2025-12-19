@@ -9,15 +9,15 @@ import { Prisma } from '@prisma/client';
  * IMPORTANT: This works in conjunction with Supabase RLS policies for defense-in-depth.
  */
 
-// Models that require company scoping
+// Models that require company scoping (PascalCase to match Prisma extension format)
 const TENANT_MODELS = [
-  'user',
-  'branch',
-  'warehouseInventory',
-  'vehicleInventoryItem',
-  'vehicleStock',
-  'order',
-  'inventoryTransaction',
+  'User',
+  'Branch',
+  'WarehouseInventory',
+  'VehicleInventoryItem',
+  'VehicleStock',
+  'Order',
+  'InventoryTransaction',
 ];
 
 /**
