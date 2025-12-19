@@ -49,7 +49,7 @@ export default async function DashboardPage() {
       }),
       role === 'ADMIN' ? scopedPrisma.user.count({ where: { active: true } }) : 0,
     ]);
-    const lowStockItems = allWarehouseItems.filter(item => item.currentQty < item.parLevel).length;
+    const lowStockItems = allWarehouseItems.filter((item: { currentQty: number; parLevel: number }) => item.currentQty < item.parLevel).length;
     stats = { ...stats, totalOrders, pendingOrders, lowStockItems, activeUsers };
   } else if (role === 'FIELD') {
     const [totalOrders, pendingOrders] = await Promise.all([
