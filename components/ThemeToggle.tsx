@@ -1,9 +1,31 @@
 'use client';
 
-import { useTheme } from '@/contexts/ThemeContext';
+import { useEffect, useState } from 'react';
 
 export default function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  useEffect(() => {
+    setMounted(true);
+    // Read theme from localStorage or default to dark
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
+
+  // Render placeholder during SSR to prevent layout shift
+  if (!mounted) {
+    return <div className="w-10 h-10" />;
+  }
 
   return (
     <button
