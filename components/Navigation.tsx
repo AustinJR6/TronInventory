@@ -45,6 +45,7 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/dashboard/warehouse', label: 'Warehouse Inventory' },
       { href: '/dashboard/orders', label: 'Orders' },
+      { href: '/dashboard/manage-part-requests', label: 'Part Requests' },
       { href: '/dashboard/branches', label: 'Branches' },
       { href: '/dashboard/users', label: 'User Management' },
       { href: '/dashboard/settings', label: 'Settings' },
@@ -53,12 +54,14 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/dashboard/warehouse', label: 'Warehouse Inventory' },
       { href: '/dashboard/orders', label: 'Orders' },
+      { href: '/dashboard/manage-part-requests', label: 'Part Requests' },
     ],
     FIELD: [
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/dashboard/my-orders', label: 'My Orders' },
       { href: '/dashboard/new-order', label: 'New Order' },
       { href: '/dashboard/vehicle-stock', label: 'Vehicle Stock' },
+      { href: '/dashboard/part-requests', label: 'Request Parts' },
     ],
   };
 
