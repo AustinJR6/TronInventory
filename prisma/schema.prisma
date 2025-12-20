@@ -60,6 +60,7 @@ model Company {
   orders                Order[]
   inventoryTransactions InventoryTransaction[]
   partRequests          PartRequest[]
+  bomDrafts             BomDraft[]
 
   @@map("companies")
 }
@@ -118,6 +119,7 @@ model User {
   orders        Order[]
   vehicleStocks VehicleStock[]
   partRequests  PartRequest[]
+  bomDrafts     BomDraft[]
 
   @@unique([companyId, vehicleNumber])
   @@map("users")
@@ -141,6 +143,7 @@ model WarehouseInventory {
   branch                Branch?                @relation(fields: [branchId], references: [id])
   orderItems            OrderItem[]
   inventoryTransactions InventoryTransaction[]
+  bomItems              BomItem[]
 
   @@unique([companyId, itemName, branchId])
   @@unique([companyId, sku, branchId])
@@ -214,6 +217,7 @@ model Order {
   branch       Branch?       @relation(fields: [branchId], references: [id])
   vehicleStock VehicleStock? @relation(fields: [vehicleStockId], references: [id])
   items        OrderItem[]
+  bomDraft     BomDraft?
 
   @@unique([companyId, orderNumber])
   @@map("orders")
@@ -255,6 +259,21 @@ enum PartRequestStatus {
   CANCELLED
 }
 
+enum BomStatus {
+  DRAFT
+  PROCESSING
+  PROCESSED
+  SUBMITTED
+  FAILED
+}
+
+enum MatchConfidence {
+  HIGH
+  MEDIUM
+  LOW
+  MANUAL
+}
+
 model PartRequest {
   id          String            @id @default(cuid())
   companyId   String
@@ -274,4 +293,49 @@ model PartRequest {
   requester User    @relation(fields: [requestedBy], references: [id])
 
   @@map("part_requests")
+}
+
+model BomDraft {
+  id                String    @id @default(cuid())
+  companyId         String
+  userId            String
+  name              String
+  description       String?
+  pdfFileName       String
+  pdfFilePath       String
+  pdfFileSize       Int
+  status            BomStatus @default(DRAFT)
+  aiProcessingError String?   @db.Text
+  orderId           String?   @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  submittedAt       DateTime?
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User     @relation(fields: [userId], references: [id])
+  order   Order?   @relation(fields: [orderId], references: [id])
+  items   BomItem[]
+
+  @@map("bom_drafts")
+}
+
+model BomItem {
+  id                  String          @id @default(cuid())
+  bomDraftId          String
+  extractedItemName   String
+  extractedQuantity   Int
+  extractedUnit       String?
+  extractedCategory   String?
+  warehouseItemId     String?
+  matchConfidence     MatchConfidence @default(LOW)
+  aiMatchReason       String?         @db.Text
+  manuallyOverridden  Boolean         @default(false)
+  notes               String?         @db.Text
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  bomDraft      BomDraft            @relation(fields: [bomDraftId], references: [id], onDelete: Cascade)
+  warehouseItem WarehouseInventory? @relation(fields: [warehouseItemId], references: [id])
+
+  @@map("bom_items")
 }

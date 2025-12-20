@@ -19,6 +19,8 @@ const TENANT_MODELS = [
   'Order',
   'InventoryTransaction',
   'PartRequest',
+  'BomDraft',
+  'BomItem',
 ];
 
 /**

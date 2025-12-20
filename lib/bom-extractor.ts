@@ -1,0 +1,133 @@
+import { openai, AI_CONFIG } from './openai-client';
+import { extractPdfText } from './pdf-processor';
+
+export interface ExtractedBomItem {
+  itemName: string;
+  quantity: number;
+  unit?: string;
+  category?: string;
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW';
+}
+
+/**
+ * Extracts Bill of Materials from a PDF planset using OpenAI
+ * @param pdfPath - Absolute path to the PDF file
+ * @param warehouseInventory - Current warehouse inventory for context
+ * @returns Array of extracted BOM items
+ */
+export async function extractBomFromPdf(
+  pdfPath: string,
+  warehouseInventory: Array<{
+    id: string;
+    itemName: string;
+    sku?: string | null;
+    category: string;
+    unit: string;
+  }>
+): Promise<ExtractedBomItem[]> {
+  // Step 1: Extract text from PDF
+  const pdfText = await extractPdfText(pdfPath);
+
+  if (!pdfText || pdfText.trim().length === 0) {
+    throw new Error('No text content found in PDF');
+  }
+
+  // Step 2: Create warehouse inventory context for better matching
+  const inventoryContext = warehouseInventory
+    .slice(0, 100) // Limit to avoid token overflow
+    .map((item) => `${item.itemName} (${item.category}) - SKU: ${item.sku || 'N/A'} - Unit: ${item.unit}`)
+    .join('\n');
+
+  // Step 3: Create prompt for OpenAI
+  const prompt = `You are an expert construction materials analyst specializing in solar installations. Analyze this construction planset and extract a comprehensive Bill of Materials (BOM).
+
+WAREHOUSE INVENTORY CONTEXT (for reference):
+${inventoryContext}
+
+PDF CONTENT:
+${pdfText.substring(0, 12000)}
+
+TASK:
+1. Extract ALL materials, parts, and components mentioned in the planset
+2. Extract quantities - convert to integers (round up if fractional)
+3. Determine units of measurement (ea, ft, box, roll, etc.)
+4. Categorize each item (conduit, wire, panels, connectors, mounting, electrical, etc.)
+5. Assign confidence level:
+   - HIGH: Quantity and item clearly stated with specific details
+   - MEDIUM: Item mentioned with quantity but some ambiguity
+   - LOW: Item inferred or quantity estimated
+
+IMPORTANT GUIDELINES:
+- Include ONLY materials that need to be ordered/supplied
+- Do NOT include labor, permits, or services
+- Be specific with item names (e.g., "2" EMT Conduit" not just "Conduit")
+- If multiple similar items, list them separately
+- Use common construction/solar terminology
+
+RESPONSE FORMAT (JSON array only, no markdown):
+[
+  {
+    "itemName": "string (specific item name)",
+    "quantity": number (integer),
+    "unit": "string (ea, ft, box, etc.)",
+    "category": "string (conduit, wire, panels, etc.)",
+    "confidence": "HIGH|MEDIUM|LOW"
+  }
+]
+
+Return ONLY the JSON array with no additional text, explanations, or markdown formatting.`;
+
+  try {
+    // Step 4: Call OpenAI API
+    const response = await openai.chat.completions.create({
+      model: AI_CONFIG.model,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: AI_CONFIG.temperature,
+      max_tokens: AI_CONFIG.maxTokens,
+    });
+
+    const content = response.choices[0].message.content;
+
+    if (!content) {
+      throw new Error('OpenAI returned empty response');
+    }
+
+    // Step 5: Parse JSON response
+    // Remove markdown code blocks if present
+    const cleanedContent = content
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+
+    const extractedItems: ExtractedBomItem[] = JSON.parse(cleanedContent);
+
+    // Step 6: Validate and sanitize
+    const validItems = extractedItems.filter((item) => {
+      return (
+        item.itemName &&
+        item.itemName.length > 0 &&
+        item.quantity &&
+        item.quantity > 0 &&
+        ['HIGH', 'MEDIUM', 'LOW'].includes(item.confidence)
+      );
+    });
+
+    if (validItems.length === 0) {
+      throw new Error('No valid materials found in PDF');
+    }
+
+    return validItems;
+  } catch (error: any) {
+    console.error('BOM extraction error:', error);
+
+    if (error instanceof SyntaxError) {
+      throw new Error('Failed to parse AI response - invalid JSON format');
+    }
+
+    if (error.message?.includes('API key')) {
+      throw new Error('OpenAI API key is invalid or missing');
+    }
+
+    throw new Error(`AI processing failed: ${error.message}`);
+  }
+}

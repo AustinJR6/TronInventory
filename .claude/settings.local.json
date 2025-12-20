@@ -31,7 +31,9 @@
       "Bash(npm run build:*)",
       "Bash(npx tsx:*)",
       "Bash(npx prisma db pull:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []
