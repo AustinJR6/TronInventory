@@ -18,6 +18,7 @@ const TENANT_MODELS = [
   'VehicleStock',
   'Order',
   'InventoryTransaction',
+  'PartRequest',
 ];
 
 /**

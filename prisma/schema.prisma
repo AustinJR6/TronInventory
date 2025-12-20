@@ -59,6 +59,7 @@ model Company {
   vehicleStocks         VehicleStock[]
   orders                Order[]
   inventoryTransactions InventoryTransaction[]
+  partRequests          PartRequest[]
 
   @@map("companies")
 }
@@ -116,6 +117,7 @@ model User {
   branch        Branch?        @relation(fields: [branchId], references: [id])
   orders        Order[]
   vehicleStocks VehicleStock[]
+  partRequests  PartRequest[]
 
   @@unique([companyId, vehicleNumber])
   @@map("users")
@@ -241,4 +243,32 @@ model InventoryTransaction {
   item    WarehouseInventory @relation(fields: [itemId], references: [id])
 
   @@map("inventory_transactions")
+}
+
+enum PartRequestStatus {
+  PENDING
+  IN_PROGRESS
+  FULFILLED
+  CANCELLED
+}
+
+model PartRequest {
+  id          String            @id @default(cuid())
+  companyId   String
+  requestedBy String
+  itemName    String
+  description String?
+  quantity    Int               @default(1)
+  urgency     String            @default("normal") // low, normal, high, critical
+  status      PartRequestStatus @default(PENDING)
+  notes       String?
+  fulfilledBy String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  fulfilledAt DateTime?
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  requester User    @relation(fields: [requestedBy], references: [id])
+
+  @@map("part_requests")
 }
