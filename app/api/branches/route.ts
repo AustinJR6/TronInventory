@@ -137,7 +137,12 @@ export async function POST(request: NextRequest) {
 
       if (sourceInventory.length > 0) {
         await scopedPrisma.warehouseInventory.createMany({
-          data: sourceInventory.map(item => ({
+          data: sourceInventory.map((item: {
+            itemName: string;
+            category: string;
+            parLevel: number;
+            unit: string;
+          }) => ({
             ...item,
             branchId: newBranch.id,
             currentQty: 0, // Start with 0 quantity for new branch

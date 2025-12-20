@@ -11,7 +11,7 @@ import { enforceAll } from '@/lib/enforcement';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    const { companyId, role, userId } = await enforceAll(session);
+    const { companyId, userRole, userId } = await enforceAll(session);
     const scopedPrisma = withCompanyScope(companyId);
 
     const searchParams = request.nextUrl.searchParams;
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Field workers only see their own requests
     // Admin/Warehouse see all requests
     const where: any = {};
-    if (role === 'FIELD') {
+    if (userRole === 'FIELD') {
       where.requestedBy = userId;
     }
     if (status) {
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    const { companyId, role, userId } = await enforceAll(session, {
+    const { companyId, userId } = await enforceAll(session, {
       role: ['ADMIN', 'WAREHOUSE'],
     });
     const scopedPrisma = withCompanyScope(companyId);
