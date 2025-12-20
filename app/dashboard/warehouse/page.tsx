@@ -1,6 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import dynamic from 'next/dynamic';
+
+const QRScanner = dynamic(() => import('@/components/QRScanner'), { ssr: false });
+const ScannedItemModal = dynamic(() => import('@/components/ScannedItemModal'), { ssr: false });
+const EditItemModal = dynamic(() => import('@/components/EditItemModal'), { ssr: false });
 
 interface InventoryItem {
   id: string;
@@ -10,11 +16,13 @@ interface InventoryItem {
   currentQty: number;
   unit: string;
   branchId: string | null;
-  branch?: {
+  sku: string | null;
+  qrCodeData: string | null;
+  branch: {
     id: string;
     name: string;
     city: string;
-  };
+  } | null;
 }
 
 interface Branch {
@@ -24,6 +32,7 @@ interface Branch {
 }
 
 export default function WarehousePage() {
+  const { data: session } = useSession();
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -33,6 +42,9 @@ export default function WarehousePage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState<number>(0);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [scannedItem, setScannedItem] = useState<InventoryItem | null>(null);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [newItem, setNewItem] = useState({
     itemName: '',
     category: '',
@@ -138,6 +150,108 @@ export default function WarehousePage() {
     }
   };
 
+  const handleQRScan = async (qrData: string) => {
+    try {
+      const response = await fetch('/api/qr-code/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ qrData }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.error || 'Failed to process QR code');
+        setShowScanner(false);
+        return;
+      }
+
+      const data = await response.json();
+      setScannedItem(data.item);
+      setShowScanner(false);
+    } catch (error) {
+      console.error('Error processing QR scan:', error);
+      alert('Failed to process QR code');
+      setShowScanner(false);
+    }
+  };
+
+  const handleScannedItemAction = async (action: 'adjust' | 'transfer', actionData: any) => {
+    if (action === 'adjust') {
+      // Get the current item to calculate new quantity
+      const currentItem = inventory.find((item) => item.id === actionData.itemId);
+      if (!currentItem) {
+        alert('Item not found');
+        setScannedItem(null);
+        return;
+      }
+
+      const newQty = currentItem.currentQty + actionData.quantity;
+
+      try {
+        const response = await fetch('/api/inventory', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: actionData.itemId,
+            currentQty: newQty
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update quantity');
+        }
+
+        await fetchInventory();
+      } catch (error) {
+        console.error('Error updating inventory:', error);
+        alert('Failed to update inventory');
+      }
+    } else if (action === 'transfer') {
+      // Transfer to vehicle - we'll need to implement this
+      alert('Transfer to vehicle functionality coming soon');
+    }
+    setScannedItem(null);
+  };
+
+  const handleSaveItem = async (itemId: string, updates: any) => {
+    try {
+      const response = await fetch('/api/inventory', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: itemId, ...updates }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update item');
+      }
+
+      await fetchInventory();
+    } catch (error) {
+      console.error('Error saving item:', error);
+      throw error;
+    }
+  };
+
+  const handleGenerateQR = async (itemId: string) => {
+    try {
+      const response = await fetch('/api/qr-code/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate QR code');
+      }
+
+      await fetchInventory();
+    } catch (error: any) {
+      console.error('Error generating QR code:', error);
+      throw error;
+    }
+  };
+
   const getStockStatus = (item: InventoryItem) => {
     const percentage = (item.currentQty / item.parLevel) * 100;
     if (percentage <= 25) return { color: 'text-red-600', bg: 'bg-red-100', label: 'Critical' };
@@ -156,15 +270,26 @@ export default function WarehousePage() {
           <h1 className="text-3xl font-bold text-white">Warehouse Inventory</h1>
           <p className="mt-2 text-gray-300">Manage and track warehouse stock levels</p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="btn-primary flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add New Item
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowScanner(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            Scan QR Code
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="btn-primary flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add New Item
+          </button>
+        </div>
       </div>
 
       <div className="mb-6 space-y-4">
@@ -305,12 +430,22 @@ export default function WarehousePage() {
                           </button>
                         </div>
                       ) : (
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="text-tron-orange hover:text-tron-orange-light"
-                        >
-                          Edit
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="text-blue-400 hover:text-blue-300"
+                            title="Quick edit quantity"
+                          >
+                            Quick Edit
+                          </button>
+                          <button
+                            onClick={() => setEditingItem(item)}
+                            className="text-tron-orange hover:text-tron-orange-light"
+                            title="Edit item details & QR"
+                          >
+                            Details
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -427,6 +562,39 @@ export default function WarehousePage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* QR Scanner Modal */}
+      {showScanner && (
+        <QRScanner
+          onScan={handleQRScan}
+          onClose={() => setShowScanner(false)}
+          onError={(error) => {
+            console.error('Scanner error:', error);
+            alert(`Scanner error: ${error}`);
+          }}
+        />
+      )}
+
+      {/* Scanned Item Action Modal */}
+      {scannedItem && (
+        <ScannedItemModal
+          item={scannedItem}
+          onClose={() => setScannedItem(null)}
+          onAction={handleScannedItemAction}
+        />
+      )}
+
+      {/* Edit Item Modal */}
+      {editingItem && (
+        <EditItemModal
+          item={editingItem}
+          branches={branches}
+          userRole={session?.user?.role || 'FIELD'}
+          onClose={() => setEditingItem(null)}
+          onSave={handleSaveItem}
+          onGenerateQR={handleGenerateQR}
+        />
       )}
     </div>
   );

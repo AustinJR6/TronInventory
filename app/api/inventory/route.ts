@@ -99,14 +99,24 @@ export async function PATCH(request: NextRequest) {
     const scopedPrisma = withCompanyScope(companyId);
 
     const body = await request.json();
-    const { id, currentQty } = body;
+    const { id, currentQty, itemName, category, parLevel, unit, sku, branchId } = body;
+
+    // Build update data object with only provided fields
+    const updateData: any = {
+      lastUpdated: new Date(),
+    };
+
+    if (currentQty !== undefined) updateData.currentQty = currentQty;
+    if (itemName !== undefined) updateData.itemName = itemName;
+    if (category !== undefined) updateData.category = category;
+    if (parLevel !== undefined) updateData.parLevel = parLevel;
+    if (unit !== undefined) updateData.unit = unit;
+    if (sku !== undefined) updateData.sku = sku || null;
+    if (branchId !== undefined) updateData.branchId = branchId;
 
     const updatedItem = await scopedPrisma.warehouseInventory.update({
       where: { id },
-      data: {
-        currentQty,
-        lastUpdated: new Date(),
-      },
+      data: updateData,
     });
 
     return NextResponse.json(updatedItem);

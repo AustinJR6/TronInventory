@@ -132,6 +132,8 @@ model WarehouseInventory {
   currentQty  Int
   unit        String
   branchId    String?
+  sku         String?
+  qrCodeData  String?  @db.Text
   lastUpdated DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -141,6 +143,7 @@ model WarehouseInventory {
   inventoryTransactions InventoryTransaction[]
 
   @@unique([companyId, itemName, branchId])
+  @@unique([companyId, sku, branchId])
   @@map("warehouse_inventory")
 }
 

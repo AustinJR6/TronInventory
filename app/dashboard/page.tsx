@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth';
 import { withCompanyScope } from '@/lib/prisma-middleware';
 import { enforceAll } from '@/lib/enforcement';
 import Link from 'next/link';
+import QuickScanButton from '@/components/QuickScanButton';
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -159,6 +160,9 @@ export default async function DashboardPage() {
                 </div>
               </div>
             </Link>
+            <div className="card p-4">
+              <QuickScanButton />
+            </div>
           </>
         )}
       </div>

@@ -47,6 +47,7 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard/orders', label: 'Orders' },
       { href: '/dashboard/manage-part-requests', label: 'Part Requests' },
       { href: '/dashboard/branches', label: 'Branches' },
+      { href: '/dashboard/bulk-qr', label: 'Bulk QR Codes' },
       { href: '/dashboard/users', label: 'User Management' },
       { href: '/dashboard/settings', label: 'Settings' },
     ],
