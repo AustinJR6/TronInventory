@@ -2,13 +2,29 @@
 
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
 
 const QRScanner = dynamic(() => import('@/components/QRScanner'), { ssr: false });
+const ScannedItemModal = dynamic(() => import('@/components/ScannedItemModal'), { ssr: false });
+
+interface ScannedItem {
+  id: string;
+  itemName: string;
+  sku: string | null;
+  category: string;
+  currentQty: number;
+  parLevel: number;
+  unit: string;
+  branchId: string | null;
+  branch: {
+    id: string;
+    name: string;
+    city: string;
+  } | null;
+}
 
 export default function QuickScanButton() {
   const [showScanner, setShowScanner] = useState(false);
-  const router = useRouter();
+  const [scannedItem, setScannedItem] = useState<ScannedItem | null>(null);
 
   const handleScan = async (qrData: string) => {
     try {
@@ -27,13 +43,42 @@ export default function QuickScanButton() {
 
       const data = await response.json();
       setShowScanner(false);
-
-      // Redirect to warehouse page with the item highlighted
-      router.push(`/dashboard/warehouse?highlight=${data.item.id}`);
+      setScannedItem(data.item);
     } catch (error) {
       console.error('Error processing QR scan:', error);
       alert('Failed to process QR code');
       setShowScanner(false);
+    }
+  };
+
+  const handleItemAction = async (action: 'adjust' | 'transfer', actionData: any) => {
+    if (action === 'adjust') {
+      // Calculate new quantity
+      const newQty = (scannedItem?.currentQty || 0) + actionData.quantity;
+
+      try {
+        const response = await fetch('/api/inventory', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: actionData.itemId,
+            currentQty: newQty,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update quantity');
+        }
+
+        alert('Quantity updated successfully!');
+        setScannedItem(null);
+      } catch (error) {
+        console.error('Error updating inventory:', error);
+        alert('Failed to update inventory');
+      }
+    } else if (action === 'transfer') {
+      alert('Transfer to vehicle functionality coming soon');
+      setScannedItem(null);
     }
   };
 
@@ -62,6 +107,14 @@ export default function QuickScanButton() {
             console.error('Scanner error:', error);
             alert(`Scanner error: ${error}`);
           }}
+        />
+      )}
+
+      {scannedItem && (
+        <ScannedItemModal
+          item={scannedItem}
+          onClose={() => setScannedItem(null)}
+          onAction={handleItemAction}
         />
       )}
     </>
