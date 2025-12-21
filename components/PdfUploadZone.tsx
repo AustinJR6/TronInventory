@@ -183,7 +183,7 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
               or drag and drop
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              PDF files only, up to 10MB
+              PDF files only, up to 50MB
             </p>
           </div>
         )}
