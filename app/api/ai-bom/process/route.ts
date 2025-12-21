@@ -87,9 +87,9 @@ export async function POST(request: NextRequest) {
                 category: item.category || 'Uncategorized',
                 unit: item.unit || 'ea',
                 currentQty: 0,
-                minQty: 0,
                 parLevel: 0,
-                companyId, // Will be auto-set by middleware
+                // companyId will be auto-set by middleware
+                // All other fields (branchId, sku, qrCodeData) are optional and will be null
               },
             });
 
