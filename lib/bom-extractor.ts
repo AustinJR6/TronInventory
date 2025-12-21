@@ -122,6 +122,8 @@ Return ONLY the JSON array with no additional text, explanations, or markdown fo
       throw new Error('OpenAI returned empty response');
     }
 
+    console.log('OpenAI raw response (first 500 chars):', content.substring(0, 500));
+
     // Step 5: Parse JSON response
     // Remove markdown code blocks if present
     const cleanedContent = content
@@ -129,21 +131,33 @@ Return ONLY the JSON array with no additional text, explanations, or markdown fo
       .replace(/```\n?/g, '')
       .trim();
 
+    console.log('Cleaned response (first 500 chars):', cleanedContent.substring(0, 500));
+
     const extractedItems: ExtractedBomItem[] = JSON.parse(cleanedContent);
+    console.log(`Parsed ${extractedItems.length} items from AI response`);
 
     // Step 6: Validate and sanitize
     const validItems = extractedItems.filter((item) => {
-      return (
+      const isValid = (
         item.itemName &&
         item.itemName.length > 0 &&
         item.quantity &&
         item.quantity > 0 &&
         ['HIGH', 'MEDIUM', 'LOW'].includes(item.confidence)
       );
+
+      if (!isValid) {
+        console.log('Invalid item filtered out:', JSON.stringify(item));
+      }
+
+      return isValid;
     });
 
+    console.log(`${validItems.length} valid items after filtering`);
+
     if (validItems.length === 0) {
-      throw new Error('No valid materials found in PDF');
+      console.error('All items were filtered out. Original items:', JSON.stringify(extractedItems));
+      throw new Error('No valid materials found in PDF - all extracted items failed validation');
     }
 
     return validItems;
