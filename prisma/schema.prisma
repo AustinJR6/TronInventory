@@ -41,6 +41,26 @@ enum LicenseTier {
   OPS_SCAN_PO
 }
 
+enum AiConversationStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum AiMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum AiActionStatus {
+  PROPOSED
+  CONFIRMED
+  EXECUTED
+  FAILED
+  CANCELLED
+}
+
 model Company {
   id           String   @id @default(cuid())
   name         String
@@ -61,6 +81,9 @@ model Company {
   inventoryTransactions InventoryTransaction[]
   partRequests          PartRequest[]
   bomDrafts             BomDraft[]
+  aiConversations       AiConversation[]
+  aiActions             AiAction[]
+  auditLogs             AuditLog[]
 
   @@map("companies")
 }
@@ -96,6 +119,7 @@ model Branch {
   warehouseInventory WarehouseInventory[]
   vehicleStocks      VehicleStock[]
   orders             Order[]
+  aiConversations    AiConversation[]
 
   @@unique([companyId, name])
   @@map("branches")
@@ -120,6 +144,9 @@ model User {
   vehicleStocks VehicleStock[]
   partRequests  PartRequest[]
   bomDrafts     BomDraft[]
+  aiConversations AiConversation[]
+  aiActions        AiAction[]
+  auditLogs        AuditLog[]
 
   @@unique([companyId, vehicleNumber])
   @@map("users")
@@ -340,4 +367,93 @@ model BomItem {
   warehouseItem WarehouseInventory? @relation(fields: [warehouseItemId], references: [id])
 
   @@map("bom_items")
+}
+
+model AiConversation {
+  id            String               @id @default(cuid())
+  companyId     String
+  userId        String
+  branchId      String?
+  topic         String
+  status        AiConversationStatus @default(ACTIVE)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  lastMessageAt DateTime             @default(now())
+  archivedAt    DateTime?
+
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id])
+  branch   Branch?  @relation(fields: [branchId], references: [id])
+  messages AiMessage[]
+  actions  AiAction[]
+
+  @@index([companyId, userId])
+  @@index([status, lastMessageAt])
+  @@map("ai_conversations")
+}
+
+model AiMessage {
+  id               String        @id @default(cuid())
+  conversationId   String
+  role             AiMessageRole
+  content          String        @db.Text
+  toolCalls        String?       @db.Text
+  audioTranscript  Boolean       @default(false)
+  tokenCount       Int?
+  processingTimeMs Int?
+  createdAt        DateTime      @default(now())
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@map("ai_messages")
+}
+
+model AiAction {
+  id             String         @id @default(cuid())
+  conversationId String
+  companyId      String
+  userId         String
+  actionType     String
+  status         AiActionStatus @default(PROPOSED)
+  proposedData   String         @db.Text
+  executedData   String?        @db.Text
+  errorMessage   String?        @db.Text
+  idempotencyKey String         @unique
+  entityType     String?
+  entityId       String?
+  createdAt      DateTime       @default(now())
+  confirmedAt    DateTime?
+  executedAt     DateTime?
+
+  conversation AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  company      Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id])
+
+  @@index([companyId, userId])
+  @@index([status, createdAt])
+  @@index([idempotencyKey])
+  @@map("ai_actions")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  companyId  String
+  userId     String?
+  entityType String
+  entityId   String
+  action     String
+  changes    String   @db.Text
+  reason     String?
+  source     String   @default("ui")
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([companyId, entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }
