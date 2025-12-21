@@ -6,6 +6,8 @@ export interface ExtractedBomItem {
   quantity: number;
   unit?: string;
   category?: string;
+  wireSize?: string; // e.g., "10 AWG", "12 AWG", "#6"
+  conduitSize?: string; // e.g., "1/2\"", "3/4\"", "2\""
   confidence: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
@@ -48,20 +50,25 @@ PDF CONTENT:
 ${pdfText.substring(0, 12000)}
 
 TASK:
-1. Extract ALL materials, parts, and components mentioned in the planset
+1. Extract ALL materials, parts, and components mentioned in the planset, including from any BOM tables present
 2. Extract quantities - convert to integers (round up if fractional)
 3. Determine units of measurement (ea, ft, box, roll, etc.)
 4. Categorize each item (conduit, wire, panels, connectors, mounting, electrical, etc.)
-5. Assign confidence level:
+5. For wire items: Extract wire size/gauge (e.g., "10 AWG", "12 AWG", "#6 THHN")
+6. For conduit items: Extract conduit size (e.g., "1/2\"", "3/4\"", "2\" EMT")
+7. Assign confidence level:
    - HIGH: Quantity and item clearly stated with specific details
    - MEDIUM: Item mentioned with quantity but some ambiguity
    - LOW: Item inferred or quantity estimated
 
 IMPORTANT GUIDELINES:
+- Pay special attention to any existing BOM tables in the planset
+- Include wire size for ALL wire/cable items (e.g., "10 AWG THHN Wire")
+- Include conduit size for ALL conduit items (e.g., "3/4\" EMT Conduit")
 - Include ONLY materials that need to be ordered/supplied
 - Do NOT include labor, permits, or services
-- Be specific with item names (e.g., "2" EMT Conduit" not just "Conduit")
-- If multiple similar items, list them separately
+- Be specific with item names (e.g., "2\" EMT Conduit" not just "Conduit")
+- If multiple similar items with different sizes, list them separately
 - Use common construction/solar terminology
 
 RESPONSE FORMAT (JSON array only, no markdown):
@@ -71,6 +78,8 @@ RESPONSE FORMAT (JSON array only, no markdown):
     "quantity": number (integer),
     "unit": "string (ea, ft, box, etc.)",
     "category": "string (conduit, wire, panels, etc.)",
+    "wireSize": "string (ONLY if wire/cable - e.g., '10 AWG', '12 AWG', '#6')",
+    "conduitSize": "string (ONLY if conduit - e.g., '1/2\"', '3/4\"', '2\"')",
     "confidence": "HIGH|MEDIUM|LOW"
   }
 ]

@@ -72,20 +72,56 @@ export async function POST(request: NextRequest) {
         : getAbsolutePdfPath(draft.pdfFilePath);
       const extractedItems = await extractBomFromPdf(pdfPath, inventory);
 
-      // Match items and create BomItems
-      const bomItemsData = extractedItems.map((item) => {
-        const match = matchBomItemToInventory(item, inventory);
-        return {
-          bomDraftId,
-          extractedItemName: item.itemName,
-          extractedQuantity: item.quantity,
-          extractedUnit: item.unit || null,
-          extractedCategory: item.category || null,
-          warehouseItemId: match.warehouseItemId,
-          matchConfidence: match.confidence,
-          aiMatchReason: match.reason,
-        };
-      });
+      // Auto-create warehouse items that don't exist and match items
+      const bomItemsData = await Promise.all(
+        extractedItems.map(async (item) => {
+          let match = matchBomItemToInventory(item, inventory);
+
+          // If no match found, auto-create the warehouse item
+          if (!match.warehouseItemId) {
+            console.log(`Auto-creating warehouse item: ${item.itemName}`);
+
+            const newWarehouseItem = await scopedPrisma.warehouseInventory.create({
+              data: {
+                itemName: item.itemName,
+                category: item.category || 'Uncategorized',
+                unit: item.unit || 'ea',
+                currentQty: 0,
+                minQty: 0,
+                companyId, // Will be auto-set by middleware
+              },
+            });
+
+            // Update inventory array for future matches in this batch
+            inventory.push({
+              id: newWarehouseItem.id,
+              itemName: newWarehouseItem.itemName,
+              sku: newWarehouseItem.sku,
+              category: newWarehouseItem.category,
+              unit: newWarehouseItem.unit,
+            });
+
+            match = {
+              warehouseItemId: newWarehouseItem.id,
+              confidence: 'HIGH',
+              reason: 'Auto-created from BOM extraction',
+            };
+          }
+
+          return {
+            bomDraftId,
+            extractedItemName: item.itemName,
+            extractedQuantity: item.quantity,
+            extractedUnit: item.unit || null,
+            extractedCategory: item.category || null,
+            extractedWireSize: item.wireSize || null,
+            extractedConduitSize: item.conduitSize || null,
+            warehouseItemId: match.warehouseItemId,
+            matchConfidence: match.confidence,
+            aiMatchReason: match.reason,
+          };
+        })
+      );
 
       // Delete existing items if reprocessing
       await scopedPrisma.bomItem.deleteMany({

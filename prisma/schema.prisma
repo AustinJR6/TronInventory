@@ -326,6 +326,8 @@ model BomItem {
   extractedQuantity   Int
   extractedUnit       String?
   extractedCategory   String?
+  extractedWireSize   String?         // Wire size (e.g., "10 AWG", "12 AWG")
+  extractedConduitSize String?        // Conduit size (e.g., "1/2\"", "3/4\"")
   warehouseItemId     String?
   matchConfidence     MatchConfidence @default(LOW)
   aiMatchReason       String?         @db.Text
