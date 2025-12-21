@@ -40,36 +40,57 @@ export async function extractBomFromPdf(
     .map((item) => `${item.itemName} (${item.category}) - SKU: ${item.sku || 'N/A'} - Unit: ${item.unit}`)
     .join('\n');
 
-  // Step 3: Create prompt for OpenAI
+  // Step 3: Use more PDF content to capture line diagrams and specifications
+  const maxContentLength = 30000; // Increased from 12000 to capture more detail
+  const pdfContent = pdfText.substring(0, maxContentLength);
+
+  // Step 4: Create prompt for OpenAI
   const prompt = `You are an expert construction materials analyst specializing in solar installations. Analyze this construction planset and extract a comprehensive Bill of Materials (BOM).
 
 WAREHOUSE INVENTORY CONTEXT (for reference):
 ${inventoryContext}
 
 PDF CONTENT:
-${pdfText.substring(0, 12000)}
+${pdfContent}
 
 TASK:
-1. Extract ALL materials, parts, and components mentioned in the planset, including from any BOM tables present
-2. Extract quantities - convert to integers (round up if fractional)
-3. Determine units of measurement (ea, ft, box, roll, etc.)
-4. Categorize each item (conduit, wire, panels, connectors, mounting, electrical, etc.)
-5. For wire items: Extract wire size/gauge (e.g., "10 AWG", "12 AWG", "#6 THHN")
-6. For conduit items: Extract conduit size (e.g., "1/2\"", "3/4\"", "2\" EMT")
-7. Assign confidence level:
+1. Extract ALL materials, parts, and components mentioned ANYWHERE in the planset
+2. Search the ENTIRE document including:
+   - BOM tables (if present)
+   - Line diagrams and electrical diagrams
+   - Wire schedules and conduit schedules
+   - Notes and specifications sections
+   - Circuit descriptions and callouts
+3. Extract quantities - convert to integers (round up if fractional)
+4. Determine units of measurement (ea, ft, box, roll, etc.)
+5. Categorize each item (conduit, wire, panels, connectors, mounting, electrical, etc.)
+6. For wire items: CRITICALLY IMPORTANT - Search line diagrams for wire sizes/gauges
+   - Look for notations like "10 AWG", "12 AWG", "#6 THHN", "#8", etc.
+   - Check circuit labels, wire callouts, and connection details
+7. For conduit items: CRITICALLY IMPORTANT - Search line diagrams for conduit sizes
+   - Look for notations like "1/2\" EMT", "3/4\" PVC", "2\" conduit", etc.
+   - Check raceway schedules and conduit run specifications
+8. Assign confidence level:
    - HIGH: Quantity and item clearly stated with specific details
    - MEDIUM: Item mentioned with quantity but some ambiguity
    - LOW: Item inferred or quantity estimated
 
+CRITICAL REQUIREMENTS FOR WIRE AND CONDUIT:
+- Wire and conduit specifications are OFTEN found in line diagrams, NOT in BOM tables
+- You MUST search the entire document for wire gauge and conduit size information
+- Every wire item MUST include its gauge/size (e.g., "10 AWG THHN Wire")
+- Every conduit item MUST include its size (e.g., "3/4\" EMT Conduit")
+- If you find wire without a size specified, search diagrams and notes for the circuit details
+- If you find conduit without a size, search for raceway schedules or conduit run details
+
 IMPORTANT GUIDELINES:
-- Pay special attention to any existing BOM tables in the planset
-- Include wire size for ALL wire/cable items (e.g., "10 AWG THHN Wire")
-- Include conduit size for ALL conduit items (e.g., "3/4\" EMT Conduit")
+- This BOM must include ALL equipment needed to COMPLETELY finish the job
 - Include ONLY materials that need to be ordered/supplied
 - Do NOT include labor, permits, or services
 - Be specific with item names (e.g., "2\" EMT Conduit" not just "Conduit")
 - If multiple similar items with different sizes, list them separately
 - Use common construction/solar terminology
+- Search thoroughly - missing wire sizes or conduit sizes means an incomplete BOM
 
 RESPONSE FORMAT (JSON array only, no markdown):
 [
