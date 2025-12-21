@@ -4,6 +4,21 @@ import { join } from 'path';
 // @ts-ignore - pdf2json doesn't have great types
 import PDFParser from 'pdf2json';
 
+// Decodes pdf2json-encoded text while tolerating stray percent signs or bad sequences
+const safeDecodePdfText = (text: string): string => {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    // Escape any invalid percent usage and try again; fall back to raw text
+    const sanitized = text.replace(/%(?![0-9A-Fa-f]{2})/g, '%25');
+    try {
+      return decodeURIComponent(sanitized);
+    } catch {
+      return text;
+    }
+  }
+};
+
 /**
  * Extracts text content from a PDF file
  * @param pdfPath - Absolute path to the PDF file or Blob URL
@@ -56,7 +71,9 @@ export async function extractPdfText(pdfPath: string): Promise<string> {
                     text.R.forEach((r: any) => {
                       if (r.T) {
                         // Decode URI component (pdf2json encodes text)
-                        fullText += decodeURIComponent(r.T) + ' ';
+                        // Handle malformed URI encoding gracefully
+                        const decoded = safeDecodePdfText(String(r.T));
+                        fullText += decoded + ' ';
                       }
                     });
                   }
