@@ -130,14 +130,14 @@ export default function NewOrderPage() {
   const totalItemsInOrder = Object.keys(orderItems).length;
 
   if (loading) {
-    return <div className="text-center py-8">Loading inventory...</div>;
+    return <div className="text-center py-8 text-gray-900 dark:text-white">Loading inventory...</div>;
   }
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Submit New Order</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Submit New Order</h1>
+        <p className="mt-2 text-gray-700 dark:text-gray-300">
           Select items you need from the warehouse inventory
         </p>
       </div>
@@ -147,7 +147,7 @@ export default function NewOrderPage() {
           <div className="lg:col-span-2">
             <div className="card mb-6">
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-800 dark:text-gray-300 mb-2">
                   Select Branch
                 </label>
                 <select
@@ -183,8 +183,8 @@ export default function NewOrderPage() {
                   onClick={() => setSelectedCategory('')}
                   className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                     selectedCategory === ''
-                      ? 'bg-tron-red text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-sherbet-orange dark:bg-tron-orange text-white'
+                      : 'bg-cream-dark dark:bg-tron-gray text-text-light dark:text-gray-300 border border-sherbet-orange/30 dark:border-tron-orange/30 hover:bg-cream dark:hover:bg-tron-gray-light'
                   }`}
                 >
                   All
@@ -196,8 +196,8 @@ export default function NewOrderPage() {
                     onClick={() => setSelectedCategory(category)}
                     className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                       selectedCategory === category
-                        ? 'bg-tron-red text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-sherbet-orange dark:bg-tron-orange text-white'
+                        : 'bg-cream-dark dark:bg-tron-gray text-text-light dark:text-gray-300 border border-sherbet-orange/30 dark:border-tron-orange/30 hover:bg-cream dark:hover:bg-tron-gray-light'
                     }`}
                   >
                     {category}
@@ -206,31 +206,31 @@ export default function NewOrderPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
+                  <thead className="bg-cream-dark dark:bg-tron-black">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
                         Item
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
                         Available
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
                         Quantity
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-tron-gray-light divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
                     {filteredItems.map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      <tr key={item.id} className="hover:bg-cream dark:hover:bg-gray-750">
+                        <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                           {item.itemName}
-                          <div className="text-xs text-gray-500">{item.category}</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">{item.category}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                           {item.currentQty} {item.unit}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                           <input
                             type="number"
                             min="0"
@@ -239,9 +239,9 @@ export default function NewOrderPage() {
                             onChange={(e) =>
                               handleQtyChange(item.id, parseInt(e.target.value) || 0)
                             }
-                            className="w-24 px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-tron-red focus:border-transparent"
+                            className="w-24 px-2 py-1 border-2 border-sherbet-orange dark:border-tron-orange/30 rounded-md focus:ring-2 focus:ring-sherbet-orange-dark dark:focus:ring-tron-orange bg-white dark:bg-tron-black text-gray-900 dark:text-white font-medium"
                           />
-                          <span className="ml-2 text-gray-500">{item.unit}</span>
+                          <span className="ml-2 text-gray-700 dark:text-gray-300">{item.unit}</span>
                         </td>
                       </tr>
                     ))}
@@ -253,17 +253,17 @@ export default function NewOrderPage() {
 
           <div className="lg:col-span-1">
             <div className="card sticky top-4">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Order Summary</h2>
 
               <div className="mb-4">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
                   <span className="font-medium">{totalItemsInOrder}</span> item
                   {totalItemsInOrder !== 1 ? 's' : ''} selected
                 </p>
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-800 dark:text-gray-300 mb-2">
                   Notes (optional)
                 </label>
                 <textarea
@@ -293,13 +293,13 @@ export default function NewOrderPage() {
               </div>
 
               {totalItemsInOrder > 0 && (
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <h3 className="text-sm font-medium text-blue-900 mb-2">Selected Items:</h3>
+                <div className="mt-4 p-3 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg">
+                  <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-2">Selected Items:</h3>
                   <div className="space-y-1 max-h-60 overflow-y-auto">
                     {Object.entries(orderItems).map(([itemId, qty]) => {
                       const item = items.find((i) => i.id === itemId);
                       return item ? (
-                        <div key={itemId} className="text-xs text-blue-800">
+                        <div key={itemId} className="text-xs text-blue-800 dark:text-blue-300">
                           {item.itemName}: {qty} {item.unit}
                         </div>
                       ) : null;

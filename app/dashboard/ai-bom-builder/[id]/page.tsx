@@ -125,8 +125,8 @@ export default function BomReviewPage() {
   if (!draft) {
     return (
       <div className="max-w-7xl mx-auto p-6">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-red-700 dark:text-red-300">Draft not found</p>
+        <div className="bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-lg p-4">
+          <p className="text-red-800 dark:text-red-300">Draft not found</p>
         </div>
       </div>
     );
@@ -137,36 +137,36 @@ export default function BomReviewPage() {
       <div className="mb-6">
         <Link
           href="/dashboard/ai-bom-builder"
-          className="text-sm text-sherbet-orange dark:text-tron-orange hover:underline mb-2 inline-block"
+          className="text-sm text-sherbet-orange dark:text-tron-orange hover:underline mb-2 inline-block font-medium"
         >
           ← Back to BOM Builder
         </Link>
 
-        <h1 className="text-3xl font-bold dark:text-white mb-2">{draft.name}</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm mb-2">{draft.name}</h1>
         {draft.description && (
-          <p className="text-gray-600 dark:text-gray-400">{draft.description}</p>
+          <p className="text-gray-700 dark:text-gray-300">{draft.description}</p>
         )}
 
-        <div className="mt-4 flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-4 flex items-center gap-4 text-sm text-gray-700 dark:text-gray-400">
           <span>📄 {draft.pdfFileName}</span>
           <span>📦 {draft.items.length} items extracted</span>
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+        <div className="mb-4 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-lg p-4">
+          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
 
       {successMessage && (
-        <div className="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <p className="text-sm text-green-700 dark:text-green-300">{successMessage}</p>
+        <div className="mb-4 bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-800 rounded-lg p-4">
+          <p className="text-sm text-green-800 dark:text-green-300">{successMessage}</p>
         </div>
       )}
 
       <div className="card">
-        <h2 className="text-xl font-semibold mb-4 dark:text-white">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
           Review & Match Items
         </h2>
 

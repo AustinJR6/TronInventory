@@ -230,15 +230,15 @@ export default function BulkQRPage() {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-white">Loading inventory...</div>;
+    return <div className="text-center py-8 text-gray-900 dark:text-white">Loading inventory...</div>;
   }
 
   return (
     <div>
       <div className="mb-8 flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-white">Bulk QR Code Management</h1>
-          <p className="mt-2 text-gray-300">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Bulk QR Code Management</h1>
+          <p className="mt-2 text-gray-700 dark:text-gray-300">
             Generate and print QR codes for multiple items (SKU required)
           </p>
         </div>
@@ -251,7 +251,7 @@ export default function BulkQRPage() {
       <div className="card mb-6">
         <div className="flex gap-4 items-end">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-bold text-gray-800 dark:text-gray-300 mb-2">
               Filter by Category
             </label>
             <select
@@ -269,7 +269,7 @@ export default function BulkQRPage() {
           </div>
 
           <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className="block text-sm font-bold text-gray-800 dark:text-gray-300 mb-2">
               Filter by Branch
             </label>
             <select
@@ -290,9 +290,9 @@ export default function BulkQRPage() {
 
       {/* Actions */}
       {selectedItems.size > 0 && (
-        <div className="card mb-6 bg-tron-orange/10 border border-tron-orange">
+        <div className="card mb-6 bg-sherbet-orange/10 dark:bg-tron-orange/10 border-2 border-sherbet-orange dark:border-tron-orange">
           <div className="flex justify-between items-center">
-            <span className="text-white font-medium">
+            <span className="text-gray-900 dark:text-white font-medium">
               {selectedItems.size} item(s) selected
             </span>
             <div className="flex gap-3">
@@ -310,70 +310,70 @@ export default function BulkQRPage() {
       {/* Items List */}
       {inventory.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-gray-400">
+          <p className="text-gray-600 dark:text-gray-400">
             No items with SKUs found. Add SKUs to items to generate QR codes.
           </p>
         </div>
       ) : (
         <div className="card overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-900">
+          <table className="min-w-full divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
+            <thead className="bg-cream-dark dark:bg-tron-black">
               <tr>
                 <th className="px-6 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={selectedItems.size === inventory.length && inventory.length > 0}
                     onChange={toggleAll}
-                    className="rounded border-gray-600 text-tron-orange focus:ring-tron-orange"
+                    className="rounded border-sherbet-orange dark:border-gray-600 text-sherbet-orange dark:text-tron-orange focus:ring-sherbet-orange dark:focus:ring-tron-orange"
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
                   Item Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
                   SKU
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
                   Branch
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
                   QR Code
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
+            <tbody className="bg-white dark:bg-tron-gray-light divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
               {inventory.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-750">
+                <tr key={item.id} className="hover:bg-cream dark:hover:bg-gray-750">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <input
                       type="checkbox"
                       checked={selectedItems.has(item.id)}
                       onChange={() => toggleItem(item.id)}
-                      className="rounded border-gray-600 text-tron-orange focus:ring-tron-orange"
+                      className="rounded border-sherbet-orange dark:border-gray-600 text-sherbet-orange dark:text-tron-orange focus:ring-sherbet-orange dark:focus:ring-tron-orange"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                     {item.itemName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                     {item.sku}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                     {item.category}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                     {item.branch?.name || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {item.qrCodeData ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-900/50 text-green-300 border border-green-700">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-700">
                         Generated
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-900/50 text-yellow-300 border border-yellow-700">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 border border-yellow-300 dark:border-yellow-700">
                         Not Generated
                       </span>
                     )}

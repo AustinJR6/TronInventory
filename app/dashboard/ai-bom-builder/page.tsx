@@ -147,23 +147,23 @@ export default function AIBomBuilderPage() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold dark:text-white mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm mb-2">
           AI-Powered BOM Builder
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-700 dark:text-gray-300">
           Upload planset PDFs and let AI extract your materials list automatically
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+        <div className="mb-4 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-800 rounded-lg p-4">
+          <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
         </div>
       )}
 
       {successMessage && (
-        <div className="mb-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <p className="text-sm text-green-700 dark:text-green-300">{successMessage}</p>
+        <div className="mb-4 bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-800 rounded-lg p-4">
+          <p className="text-sm text-green-800 dark:text-green-300">{successMessage}</p>
         </div>
       )}
 
@@ -171,7 +171,7 @@ export default function AIBomBuilderPage() {
         {/* Upload Section */}
         <div className="lg:col-span-1">
           <div className="card sticky top-6">
-            <h2 className="text-xl font-semibold mb-4 dark:text-white">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
               Upload New Planset
             </h2>
             <PdfUploadZone
@@ -183,14 +183,14 @@ export default function AIBomBuilderPage() {
 
         {/* Drafts List Section */}
         <div className="lg:col-span-2">
-          <h2 className="text-xl font-semibold mb-4 dark:text-white">
+          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
             My BOM Drafts
           </h2>
 
           {drafts.length === 0 ? (
             <div className="card text-center py-12">
               <svg
-                className="mx-auto h-12 w-12 text-gray-400 mb-4"
+                className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -202,7 +202,7 @@ export default function AIBomBuilderPage() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-gray-600 dark:text-gray-400">
                 No BOM drafts yet. Upload a planset to get started!
               </p>
             </div>

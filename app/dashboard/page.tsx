@@ -64,10 +64,10 @@ export default async function DashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">
           Welcome back, {session.user.name}
         </h1>
-        <p className="mt-2 text-gray-300">
+        <p className="mt-2 text-gray-700 dark:text-gray-300">
           {role === 'ADMIN' && 'Manage your warehouse, orders, and users from here.'}
           {role === 'WAREHOUSE' && `Manage warehouse inventory and fulfill orders${stats.branchName ? ` - ${stats.branchName} Branch` : ''}.`}
           {role === 'FIELD' && `Submit orders and manage your vehicle inventory${stats.branchName ? ` - ${stats.branchName} Branch` : ''}.`}
@@ -78,25 +78,25 @@ export default async function DashboardPage() {
         {(role === 'ADMIN' || role === 'WAREHOUSE' || role === 'FIELD') && (
           <>
             <div className="card">
-              <h3 className="text-sm font-medium text-gray-400">Total Orders</h3>
-              <p className="mt-2 text-3xl font-bold text-white">{stats.totalOrders}</p>
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Orders</h3>
+              <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.totalOrders}</p>
             </div>
             <div className="card">
-              <h3 className="text-sm font-medium text-gray-400">Pending Orders</h3>
-              <p className="mt-2 text-3xl font-bold text-tron-orange">{stats.pendingOrders}</p>
+              <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Pending Orders</h3>
+              <p className="mt-2 text-3xl font-bold text-sherbet-orange dark:text-tron-orange">{stats.pendingOrders}</p>
             </div>
           </>
         )}
         {(role === 'ADMIN' || role === 'WAREHOUSE') && (
           <div className="card">
-            <h3 className="text-sm font-medium text-gray-400">Low Stock Items</h3>
-            <p className="mt-2 text-3xl font-bold text-red-400">{stats.lowStockItems}</p>
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Low Stock Items</h3>
+            <p className="mt-2 text-3xl font-bold text-red-600 dark:text-red-400">{stats.lowStockItems}</p>
           </div>
         )}
         {role === 'ADMIN' && (
           <div className="card">
-            <h3 className="text-sm font-medium text-gray-400">Active Users</h3>
-            <p className="mt-2 text-3xl font-bold text-white">{stats.activeUsers}</p>
+            <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Users</h3>
+            <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stats.activeUsers}</p>
           </div>
         )}
       </div>
@@ -104,20 +104,20 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {role === 'FIELD' && (
           <>
-            <Link href="/dashboard/new-order" className="card hover:shadow-lg transition-shadow cursor-pointer hover:border-tron-orange">
+            <Link href="/dashboard/new-order" className="card hover:shadow-lg transition-shadow cursor-pointer hover:border-sherbet-orange dark:hover:border-tron-orange">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-tron-orange text-white p-3 rounded-lg">
+                <div className="flex-shrink-0 bg-sherbet-orange dark:bg-tron-orange text-white p-3 rounded-lg">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-white">Submit New Order</h3>
-                  <p className="text-sm text-gray-400">Request materials from the warehouse</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Submit New Order</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Request materials from the warehouse</p>
                 </div>
               </div>
             </Link>
-            <Link href="/dashboard/vehicle-stock" className="card hover:shadow-lg transition-shadow cursor-pointer hover:border-tron-orange">
+            <Link href="/dashboard/vehicle-stock" className="card hover:shadow-lg transition-shadow cursor-pointer hover:border-sherbet-orange dark:hover:border-tron-orange">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-blue-500 text-white p-3 rounded-lg">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,8 +125,8 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-white">Update Vehicle Stock</h3>
-                  <p className="text-sm text-gray-400">Weekly vehicle inventory check</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Update Vehicle Stock</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Weekly vehicle inventory check</p>
                 </div>
               </div>
             </Link>
@@ -134,20 +134,20 @@ export default async function DashboardPage() {
         )}
         {(role === 'ADMIN' || role === 'WAREHOUSE') && (
           <>
-            <Link href="/dashboard/orders" className="card hover:shadow-lg transition-shadow cursor-pointer hover:border-tron-orange">
+            <Link href="/dashboard/orders" className="card hover:shadow-lg transition-shadow cursor-pointer hover:border-sherbet-orange dark:hover:border-tron-orange">
               <div className="flex items-center">
-                <div className="flex-shrink-0 bg-tron-orange text-white p-3 rounded-lg">
+                <div className="flex-shrink-0 bg-sherbet-orange dark:bg-tron-orange text-white p-3 rounded-lg">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-white">Manage Orders</h3>
-                  <p className="text-sm text-gray-400">View and process orders</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Manage Orders</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">View and process orders</p>
                 </div>
               </div>
             </Link>
-            <Link href="/dashboard/warehouse" className="card hover:shadow-lg transition-shadow cursor-pointer hover:border-tron-orange">
+            <Link href="/dashboard/warehouse" className="card hover:shadow-lg transition-shadow cursor-pointer hover:border-sherbet-orange dark:hover:border-tron-orange">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-green-500 text-white p-3 rounded-lg">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -155,8 +155,8 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-medium text-white">Warehouse Inventory</h3>
-                  <p className="text-sm text-gray-400">Manage stock levels</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Warehouse Inventory</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Manage stock levels</p>
                 </div>
               </div>
             </Link>
