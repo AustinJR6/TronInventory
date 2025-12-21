@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     // Authenticate and get session
     const session = await getServerSession(authOptions);
-    await enforceAll(session, { role: 'FIELD' });
+    await enforceAll(session, { role: ['ADMIN', 'FIELD'] });
 
     const body = (await request.json()) as HandleUploadBody;
 
