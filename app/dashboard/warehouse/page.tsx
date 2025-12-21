@@ -355,9 +355,9 @@ export default function WarehousePage() {
       </div>
 
       <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-24rem)]">
           <table className="min-w-full divide-y divide-tron-orange/20">
-            <thead className="bg-tron-black">
+            <thead className="bg-tron-black sticky top-0 z-10">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
                   Item Name
