@@ -16,11 +16,16 @@ export async function POST(request: NextRequest) {
     const { companyId, userId } = await enforceAll(session, { role: 'FIELD' });
     const scopedPrisma = withCompanyScope(companyId);
 
+    console.log('Upload request received, parsing form data...');
+
     // Parse form data
     const formData = await request.formData();
+    console.log('Form data parsed successfully');
     const file = formData.get('file') as File | null;
     const name = formData.get('name') as string;
     const description = formData.get('description') as string | null;
+
+    console.log(`File received: ${file?.name}, size: ${file?.size} bytes (${(file?.size || 0) / 1024 / 1024} MB)`);
 
     // Validate inputs
     if (!file) {
@@ -101,6 +106,17 @@ export async function POST(request: NextRequest) {
     }
   } catch (error: any) {
     console.error('BOM upload error:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error name:', error.name);
+
+    // Check for specific Vercel errors
+    if (error.message?.includes('FUNCTION_PAYLOAD_TOO_LARGE')) {
+      return NextResponse.json(
+        { error: 'File size exceeds Vercel plan limits. Please upgrade your Vercel plan or use a smaller PDF.' },
+        { status: 413 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || 'Upload failed - please try again' },
       { status: 500 }
