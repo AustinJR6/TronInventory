@@ -27,7 +27,9 @@ export async function extractPdfText(pdfPath: string): Promise<string> {
     }
 
     // Use pdfjs-dist to extract text
-    const loadingTask = pdfjsLib.getDocument({ data: dataBuffer });
+    // Convert Buffer to Uint8Array (pdfjs-dist requirement)
+    const uint8Array = new Uint8Array(dataBuffer);
+    const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
     const pdfDocument = await loadingTask.promise;
 
     let fullText = '';
@@ -77,7 +79,9 @@ export async function getPdfMetadata(pdfPath: string): Promise<{
     }
 
     // Use pdfjs-dist to get metadata
-    const loadingTask = pdfjsLib.getDocument({ data: dataBuffer });
+    // Convert Buffer to Uint8Array (pdfjs-dist requirement)
+    const uint8Array = new Uint8Array(dataBuffer);
+    const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
     const pdfDocument = await loadingTask.promise;
     const metadata = await pdfDocument.getMetadata();
 
