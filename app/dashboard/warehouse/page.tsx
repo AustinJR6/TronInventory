@@ -359,22 +359,22 @@ export default function WarehousePage() {
           <table className="min-w-full divide-y divide-tron-orange/20">
             <thead className="bg-tron-black sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider w-64">
                   Item Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider w-40">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider w-28">
                   Par Level
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider w-32">
                   Current Qty
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider w-24">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider w-44">
                   Actions
                 </th>
               </tr>
@@ -386,16 +386,16 @@ export default function WarehousePage() {
 
                 return (
                   <tr key={item.id} className="hover:bg-tron-gray-light">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                    <td className="px-6 py-4 text-sm font-medium text-white w-64 max-w-xs break-words">
                       {item.itemName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 w-40">
                       {item.category}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 w-28">
                       {item.parLevel} {item.unit}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white w-32">
                       {isEditing ? (
                         <input
                           type="number"
@@ -408,12 +408,12 @@ export default function WarehousePage() {
                         `${item.currentQty} ${item.unit}`
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap w-24">
                       <span className={`badge ${status.bg} ${status.color}`}>
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium w-44">
                       {isEditing ? (
                         <div className="flex gap-2">
                           <button
