@@ -72,7 +72,10 @@ export async function executeAiFunction(
           take: 50,
         });
         const filtered = args.belowParOnly
-          ? items.filter((i) => i.currentQty < i.parLevel)
+          ? items.filter(
+              (i: { currentQty: number; parLevel: number }) =>
+                i.currentQty < i.parLevel
+            )
           : items;
         return { success: true, data: { items: filtered } };
       }
@@ -164,8 +167,10 @@ export async function executeAiFunction(
 
         if (!order) throw new Error('Order not found');
 
-        for (const item of args.pulledItems) {
-          const orderItem = order.items.find((i) => i.id === item.itemId);
+        for (const item of args.pulledItems as Array<{ itemId: string; qty: number }>) {
+          const orderItem = order.items.find(
+            (i: { id: string; warehouseItemId: string }) => i.id === item.itemId
+          );
           if (!orderItem) continue;
 
           await prisma.orderItem.update({
