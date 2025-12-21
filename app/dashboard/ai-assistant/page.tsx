@@ -22,20 +22,26 @@ type AiAction = {
   proposedData?: string | null;
 };
 
+const WELCOME_MESSAGE: Message = {
+  id: 'welcome',
+  role: 'ASSISTANT',
+  content:
+    "Hi, I'm Lana. Tell me what you need and I'll guide you. I always confirm before creating orders or pulling items.",
+};
+
 export default function AiAssistantPage() {
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<
+    Array<{ id: string; topic: string; status: string; lastMessageAt: string }>
+  >([]);
   const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'welcome',
-      role: 'ASSISTANT',
-      content:
-        "Hi, I'm Lana. Tell me what you need and I'll guide you. I always confirm before creating orders or pulling items.",
-    },
+    WELCOME_MESSAGE,
   ]);
   const [actions, setActions] = useState<AiAction[]>([]);
   const [pendingAction, setPendingAction] = useState<AiAction | null>(null);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const [branchName, setBranchName] = useState<string | null>(null);
@@ -52,6 +58,57 @@ export default function AiAssistantPage() {
       setBranchName(sessionStorage.getItem('branchName'));
     }
   }, []);
+
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch('/api/ai-assistant/conversations');
+        const data = await res.json();
+        if (res.ok && data.conversations?.length) {
+          setConversations(data.conversations);
+          const latest = data.conversations[0];
+          setConversationId(latest.id);
+          await hydrateConversation(latest.id);
+        } else {
+          setConversations([]);
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to load conversations');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadConversations();
+  }, []);
+
+  const hydrateConversation = async (id: string) => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/ai-assistant/conversations/${id}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to load conversation');
+      }
+      const mappedMessages: Message[] = data.conversation.messages.map((m: any) => ({
+        id: m.id,
+        role: m.role,
+        content: m.content,
+        createdAt: m.createdAt,
+      }));
+      setMessages(
+        mappedMessages.length
+          ? mappedMessages
+          : [WELCOME_MESSAGE]
+      );
+      setActions(data.conversation.actions || []);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load conversation');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
@@ -96,6 +153,12 @@ export default function AiAssistantPage() {
           ? data.proposedActions[0]
           : null
       );
+      if (!conversations.find((c) => c.id === data.conversationId)) {
+        setConversations((prev) => [
+          { id: data.conversationId, topic: data.topic || 'general', status: 'ACTIVE', lastMessageAt: new Date().toISOString() },
+          ...prev,
+        ]);
+      }
     } catch (err: any) {
       setError(err.message || 'Something went wrong');
     } finally {
@@ -163,34 +226,63 @@ export default function AiAssistantPage() {
             <BranchContextChip branchName={branchName} />
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setConversationId(null);
-            setMessages((prev) => prev.slice(0, 1));
-            setActions([]);
-          }}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700"
-        >
-          New Chat
-        </button>
+        <div className="flex items-center gap-3">
+          {conversations.length > 0 && (
+            <select
+              value={conversationId || ''}
+              onChange={async (e) => {
+                const id = e.target.value;
+                setConversationId(id);
+                if (id) {
+                  await hydrateConversation(id);
+                }
+              }}
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+            >
+              <option value="">Start new conversation</option>
+              {conversations.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.topic || 'conversation'} • {new Date(c.lastMessageAt).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setConversationId(null);
+              setMessages([WELCOME_MESSAGE]);
+              setActions([]);
+              setPendingAction(null);
+            }}
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700"
+          >
+            New Chat
+          </button>
+        </div>
       </header>
 
       <section
         ref={scrollRef}
         className="flex-1 overflow-y-auto rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900"
       >
-        <div className="flex flex-col gap-4">
-          {messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              isUser={message.role === 'USER'}
-            />
-          ))}
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center text-sm text-gray-600 dark:text-gray-300">
+            Loading conversation...
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {messages.map((message) => (
+              <ChatMessage
+                key={message.id}
+                message={message}
+                isUser={message.role === 'USER'}
+              />
+            ))}
 
-          <ActionIndicator actions={actions} />
-        </div>
+            <ActionIndicator actions={actions} />
+          </div>
+        )}
       </section>
 
       <section className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">

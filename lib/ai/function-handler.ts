@@ -3,7 +3,9 @@ import { AI_FUNCTIONS } from './function-definitions';
 import { withCompanyScope } from '../prisma-middleware';
 import type { UserRole } from '@prisma/client';
 
-type FunctionCall = { name: string; arguments: string };
+type FunctionCall =
+  | { name: string; arguments: string }
+  | { function: { name: string; arguments: string } };
 type UserContext = {
   userId: string;
   companyId: string;
@@ -32,7 +34,10 @@ export async function handleFunctionCalls(
   const actions = [];
 
   for (const call of functionCalls) {
-    const definition = AI_FUNCTIONS[call.name];
+    const fnName = 'function' in call ? call.function.name : call.name;
+    const fnArgs = 'function' in call ? call.function.arguments : call.arguments;
+
+    const definition = AI_FUNCTIONS[fnName];
     if (!definition) {
       continue;
     }
@@ -43,14 +48,14 @@ export async function handleFunctionCalls(
 
     let parsedArgs: any = {};
     try {
-      parsedArgs = JSON.parse(call.arguments || '{}');
+      parsedArgs = JSON.parse(fnArgs || '{}');
     } catch {
       parsedArgs = {};
     }
 
     const idempotencyKey = buildIdempotencyKey(
       context.userId,
-      call.name,
+      fnName,
       parsedArgs
     );
 
@@ -59,7 +64,7 @@ export async function handleFunctionCalls(
         conversationId: context.conversationId,
         companyId: context.companyId,
         userId: context.userId,
-        actionType: call.name,
+        actionType: fnName,
         status: 'PROPOSED',
         proposedData: JSON.stringify(parsedArgs),
         idempotencyKey,

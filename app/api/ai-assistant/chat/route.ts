@@ -6,6 +6,7 @@ import { withCompanyScope } from '@/lib/prisma-middleware';
 import { buildConversationContext } from '@/lib/ai/context-builder';
 import { handleFunctionCalls } from '@/lib/ai/function-handler';
 import { AI_FUNCTIONS } from '@/lib/ai/function-definitions';
+import { openai, AI_MODELS, AI_DEFAULTS } from '@/lib/ai/openai-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,6 +27,12 @@ export async function POST(request: NextRequest) {
     }
 
     const branchId = session?.user?.branchId ?? null;
+    const branch =
+      branchId &&
+      (await prisma.branch.findFirst({
+        where: { id: branchId },
+      }));
+
     let conversation =
       conversationId &&
       (await prisma.aiConversation.findFirst({
@@ -58,29 +65,56 @@ export async function POST(request: NextRequest) {
       take: 10,
     });
 
-    const contextPreview = buildConversationContext(
+    const context = buildConversationContext(
       { name: session?.user?.name || 'User', role: userRole as any },
-      null,
+      branch || null,
       recentMessages
     );
 
-    // Phase 1 stub: respond with a canned message and list available tools
-    const toolList = Object.values(AI_FUNCTIONS)
-      .filter((fn) => fn.requiredRoles.includes(userRole as any))
-      .map((fn) => fn.name)
-      .join(', ');
+    const allowedFunctions = Object.values(AI_FUNCTIONS).filter((fn) =>
+      fn.requiredRoles.includes(userRole as any)
+    );
 
-    const aiResponse =
-      toolList.length > 0
-        ? `Hi, I'm Lana. I can help with inventory and orders. Tools available: ${toolList}. What would you like to do next?`
-        : `Hi, I'm Lana. Tell me how I can help with your inventory.`;
+    let aiResponse =
+      `Hi, I'm Lana. I can help with inventory and orders. What would you like to do next?`;
+    let toolCalls: any[] | null = null;
+
+    if (process.env.OPENAI_API_KEY) {
+      const messagesForOpenAI = [
+        { role: 'system', content: context },
+        ...recentMessages.map((m) => ({
+          role: m.role === 'USER' ? 'user' : 'assistant',
+          content: m.content,
+        })),
+      ];
+
+      const completion = await openai.chat.completions.create({
+        model: AI_MODELS.chat,
+        temperature: AI_DEFAULTS.temperature,
+        max_tokens: AI_DEFAULTS.maxTokens,
+        messages: messagesForOpenAI,
+        tools: allowedFunctions.map((fn) => ({
+          type: 'function',
+          function: {
+            name: fn.name,
+            description: fn.description,
+            parameters: fn.parameters as any,
+          },
+        })),
+        tool_choice: 'auto',
+      });
+
+      const choice = completion.choices[0];
+      aiResponse = choice.message.content || aiResponse;
+      toolCalls = choice.message.tool_calls || null;
+    }
 
     const assistantMessage = await prisma.aiMessage.create({
       data: {
         conversationId: conversation.id,
         role: 'ASSISTANT',
         content: aiResponse,
-        toolCalls: null,
+        toolCalls: toolCalls ? JSON.stringify(toolCalls) : null,
       },
     });
 
@@ -92,8 +126,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // No real function calls yet; stubbing for Phase 1
-    const proposedActions = await handleFunctionCalls([], {
+    const proposedActions = await handleFunctionCalls(toolCalls || [], {
       userId,
       companyId,
       branchId,
@@ -107,7 +140,7 @@ export async function POST(request: NextRequest) {
       proposedActions,
       requiresConfirmation: proposedActions.length > 0,
       assistantMessage,
-      contextPreview,
+      topic: conversation.topic,
     });
   } catch (error: any) {
     console.error('AI assistant chat error:', error);
