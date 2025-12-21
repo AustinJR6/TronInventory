@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 
 /**
  * Extracts text content from a PDF file
