@@ -267,8 +267,8 @@ export default function WarehousePage() {
     <div>
       <div className="mb-8 flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-text-light dark:text-white">Warehouse Inventory</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-300">Manage and track warehouse stock levels</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Warehouse Inventory</h1>
+          <p className="mt-2 text-gray-700 dark:text-gray-300">Manage and track warehouse stock levels</p>
         </div>
         <div className="flex gap-3">
           <button
@@ -295,7 +295,7 @@ export default function WarehousePage() {
       <div className="mb-6 space-y-4">
         {/* Branch Filter */}
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Branch:</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-300">Branch:</span>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedBranch('')}
@@ -325,7 +325,7 @@ export default function WarehousePage() {
 
         {/* Category Filter */}
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Category:</span>
+          <span className="text-sm font-bold text-gray-800 dark:text-gray-300">Category:</span>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedCategory('')}
@@ -359,22 +359,22 @@ export default function WarehousePage() {
           <table className="min-w-full divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
             <thead className="bg-cream-dark dark:bg-tron-black sticky top-0 z-10">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-sherbet-orange dark:text-tron-orange uppercase tracking-wider w-64">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider w-64">
                   Item Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-sherbet-orange dark:text-tron-orange uppercase tracking-wider w-40">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider w-40">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-sherbet-orange dark:text-tron-orange uppercase tracking-wider w-28">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider w-28">
                   Par Level
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-sherbet-orange dark:text-tron-orange uppercase tracking-wider w-32">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider w-32">
                   Current Qty
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-sherbet-orange dark:text-tron-orange uppercase tracking-wider w-24">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider w-24">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-sherbet-orange dark:text-tron-orange uppercase tracking-wider w-44">
+                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider w-44">
                   Actions
                 </th>
               </tr>
@@ -385,23 +385,23 @@ export default function WarehousePage() {
                 const isEditing = editingId === item.id;
 
                 return (
-                  <tr key={item.id} className="hover:bg-cream dark:hover:bg-tron-gray-light transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-text-light dark:text-white w-64 max-w-xs break-words">
+                  <tr key={item.id} className="hover:bg-cream/70 dark:hover:bg-tron-gray-light transition-colors">
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white w-64 max-w-xs break-words">
                       {item.itemName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 w-40">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 w-40">
                       {item.category}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 w-28">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300 w-28">
                       {item.parLevel} {item.unit}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-light dark:text-white w-32">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white w-32">
                       {isEditing ? (
                         <input
                           type="number"
                           value={editValue}
                           onChange={(e) => setEditValue(parseInt(e.target.value))}
-                          className="w-24 px-2 py-1 border border-sherbet-orange/30 dark:border-tron-orange/30 rounded-md focus:ring-2 focus:ring-sherbet-orange dark:focus:ring-tron-orange focus:border-transparent bg-white dark:bg-tron-black text-text-light dark:text-white"
+                          className="w-24 px-2 py-1 border-2 border-sherbet-orange dark:border-tron-orange/30 rounded-md focus:ring-2 focus:ring-sherbet-orange-dark dark:focus:ring-tron-orange focus:border-transparent bg-white dark:bg-tron-black text-gray-900 dark:text-white font-medium"
                           min="0"
                         />
                       ) : (
@@ -459,11 +459,11 @@ export default function WarehousePage() {
       {/* Add New Item Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-tron-gray rounded-lg shadow-xl max-w-md w-full p-6 border border-sherbet-orange/30 dark:border-tron-orange/30">
-            <h2 className="text-2xl font-bold text-text-light dark:text-white mb-4">Add New Item</h2>
+          <div className="bg-white dark:bg-tron-gray rounded-lg shadow-2xl max-w-md w-full p-6 border-2 border-sherbet-orange dark:border-tron-orange/30">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Add New Item</h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">
                   Item Name
                 </label>
                 <input
@@ -475,7 +475,7 @@ export default function WarehousePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">
                   Branch
                 </label>
                 <select
@@ -493,7 +493,7 @@ export default function WarehousePage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">
                   Category
                 </label>
                 <input
@@ -505,7 +505,7 @@ export default function WarehousePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">
                   Unit
                 </label>
                 <input
@@ -518,7 +518,7 @@ export default function WarehousePage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">
                     Par Level
                   </label>
                   <input
@@ -531,7 +531,7 @@ export default function WarehousePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-semibold text-gray-800 dark:text-gray-300 mb-1">
                     Current Qty
                   </label>
                   <input
