@@ -1,6 +1,9 @@
 import { readFile } from 'fs/promises';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 
+// Disable worker for server-side usage
+pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+
 /**
  * Extracts text content from a PDF file
  * @param pdfPath - Absolute path to the PDF file or Blob URL
