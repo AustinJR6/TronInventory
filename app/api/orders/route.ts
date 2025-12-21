@@ -75,12 +75,11 @@ export async function POST(request: NextRequest) {
 
     // Enforce authentication, role, and get scoped context
     const { companyId, userId } = await enforceAll(session, {
-      role: 'FIELD',
+      role: ['ADMIN', 'FIELD'],
     });
 
-    if (!session?.user?.vehicleNumber) {
-      return NextResponse.json({ error: 'Vehicle number required for field users' }, { status: 400 });
-    }
+    // Vehicle number is optional for ADMIN users
+    const vehicleNumber = session?.user?.vehicleNumber || 'ADMIN-ORDER';
 
     // Use company-scoped Prisma client
     const scopedPrisma = withCompanyScope(companyId);
@@ -96,7 +95,7 @@ export async function POST(request: NextRequest) {
       data: {
         orderNumber,
         userId,
-        vehicleNumber: session.user.vehicleNumber,
+        vehicleNumber,
         orderType: 'AD_HOC',
         notes,
         branchId: branchId || null,

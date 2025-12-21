@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     // Authenticate and get session
     const session = await getServerSession(authOptions);
-    const { companyId, userId } = await enforceAll(session, { role: 'FIELD' });
+    const { companyId, userId } = await enforceAll(session, { role: ['ADMIN', 'FIELD'] });
     const scopedPrisma = withCompanyScope(companyId);
 
     // Parse request
