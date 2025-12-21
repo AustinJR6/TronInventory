@@ -4,7 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { enforceAll } from '@/lib/enforcement';
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 
-export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
