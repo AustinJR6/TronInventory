@@ -66,7 +66,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Extract BOM from PDF using AI
-      const pdfPath = getAbsolutePdfPath(draft.pdfFilePath);
+      // pdfFilePath can be either a Blob URL (https://...) or a relative local path
+      const pdfPath = draft.pdfFilePath.startsWith('http')
+        ? draft.pdfFilePath
+        : getAbsolutePdfPath(draft.pdfFilePath);
       const extractedItems = await extractBomFromPdf(pdfPath, inventory);
 
       // Match items and create BomItems
