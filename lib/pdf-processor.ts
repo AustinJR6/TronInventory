@@ -36,7 +36,7 @@ export async function extractPdfText(pdfPath: string): Promise<string> {
 
     // Use pdf2json to extract text
     return new Promise<string>((resolve, reject) => {
-      const pdfParser = new PDFParser(null, 1);
+      const pdfParser = new PDFParser();
 
       pdfParser.on('pdfParser_dataError', (errData: any) => {
         console.error('PDF parsing error:', errData.parserError);
@@ -116,7 +116,7 @@ export async function getPdfMetadata(pdfPath: string): Promise<{
 
     // Use pdf2json to get metadata
     return new Promise<{ pages: number; info: any }>((resolve, reject) => {
-      const pdfParser = new PDFParser(null, 1);
+      const pdfParser = new PDFParser();
 
       pdfParser.on('pdfParser_dataError', (errData: any) => {
         console.error('PDF metadata extraction error:', errData.parserError);
