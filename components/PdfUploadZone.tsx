@@ -41,17 +41,26 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
   };
 
   const handleFile = async (file: File) => {
+    console.log('File selected:', file.name, 'Size:', file.size, 'bytes', '(', (file.size / 1024 / 1024).toFixed(2), 'MB)');
+    console.log('File type:', file.type);
+
     // Validate file type
     if (file.type !== 'application/pdf') {
+      console.error('File type validation failed:', file.type);
       onUploadError('Only PDF files are accepted');
       return;
     }
 
     // Validate file size (50MB)
-    if (file.size > 50 * 1024 * 1024) {
+    const maxSize = 50 * 1024 * 1024;
+    console.log('Checking file size:', file.size, 'vs max:', maxSize, 'Pass?', file.size <= maxSize);
+    if (file.size > maxSize) {
+      console.error('File size validation failed:', file.size, '>', maxSize);
       onUploadError('PDF must be under 50MB');
       return;
     }
+
+    console.log('All validations passed, preparing upload...');
 
     // Auto-generate name if not provided
     const finalName = bomName.trim() || file.name.replace('.pdf', '');
@@ -59,6 +68,7 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
     setIsUploading(true);
 
     try {
+      console.log('Creating FormData and appending file...');
       const formData = new FormData();
       formData.append('file', file);
       formData.append('name', finalName);
@@ -66,10 +76,12 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
         formData.append('description', description.trim());
       }
 
+      console.log('Sending POST request to /api/ai-bom/upload...');
       const response = await fetch('/api/ai-bom/upload', {
         method: 'POST',
         body: formData,
       });
+      console.log('Response received. Status:', response.status, 'OK:', response.ok);
 
       // Check if response is JSON
       const contentType = response.headers.get('content-type');
