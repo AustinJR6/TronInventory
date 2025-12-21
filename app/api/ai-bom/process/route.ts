@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
                 unit: item.unit || 'ea',
                 currentQty: 0,
                 minQty: 0,
+                parLevel: 0,
                 companyId, // Will be auto-set by middleware
               },
             });
