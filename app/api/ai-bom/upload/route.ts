@@ -5,14 +5,9 @@ import { withCompanyScope } from '@/lib/prisma-middleware';
 import { enforceAll } from '@/lib/enforcement';
 import { saveUploadedPdf } from '@/lib/file-upload';
 
-// Configure route to accept large files
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-};
+// Increase timeout for large file uploads
+export const maxDuration = 300; // 5 minutes
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {

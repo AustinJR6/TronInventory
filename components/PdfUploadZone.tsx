@@ -71,6 +71,17 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
         body: formData,
       });
 
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        // Non-JSON response (likely an error from proxy/server)
+        const text = await response.text();
+        if (text.includes('Request Entity Too Large') || text.includes('PayloadTooLargeError')) {
+          throw new Error('File is too large for upload. Please use a smaller PDF (under 50MB).');
+        }
+        throw new Error(`Upload failed: ${text.substring(0, 100)}...`);
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
