@@ -6,15 +6,16 @@ import { withCompanyScope } from '@/lib/prisma-middleware';
 
 export async function POST(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authOptions);
     const { userId, companyId } = await enforceAll(session);
     const prisma = withCompanyScope(companyId);
 
     const conversation = await prisma.aiConversation.findFirst({
-      where: { id: params.id, userId },
+      where: { id, userId },
     });
 
     if (!conversation) {
