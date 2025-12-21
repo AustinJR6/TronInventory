@@ -82,10 +82,12 @@ export async function POST(request: NextRequest) {
     if (process.env.OPENAI_API_KEY) {
       const messagesForOpenAI = [
         { role: 'system', content: context },
-        ...recentMessages.map((m) => ({
-          role: m.role === 'USER' ? 'user' : 'assistant',
-          content: m.content,
-        })),
+        ...recentMessages.map(
+          (m: { role: string; content: string }) => ({
+            role: m.role === 'USER' ? 'user' : 'assistant',
+            content: m.content,
+          })
+        ),
       ];
 
       const completion = await openai.chat.completions.create({
