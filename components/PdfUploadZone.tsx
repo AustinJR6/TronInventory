@@ -47,9 +47,9 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
       return;
     }
 
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      onUploadError('PDF must be under 10MB');
+    // Validate file size (50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      onUploadError('PDF must be under 50MB');
       return;
     }
 

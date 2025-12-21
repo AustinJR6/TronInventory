@@ -3,7 +3,7 @@ import { existsSync } from 'fs';
 import path from 'path';
 
 export const UPLOAD_CONFIG = {
-  maxFileSize: 10 * 1024 * 1024, // 10MB
+  maxFileSize: 50 * 1024 * 1024, // 50MB
   allowedMimeTypes: ['application/pdf'],
   uploadDir: path.join(process.cwd(), 'uploads'),
 };
@@ -19,7 +19,7 @@ export function validatePdfFile(file: File): { valid: boolean; error?: string } 
 
   // Check file size
   if (file.size > UPLOAD_CONFIG.maxFileSize) {
-    return { valid: false, error: 'PDF must be under 10MB' };
+    return { valid: false, error: 'PDF must be under 50MB' };
   }
 
   // Check filename for security (no path traversal)

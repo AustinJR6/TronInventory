@@ -5,6 +5,15 @@ import { withCompanyScope } from '@/lib/prisma-middleware';
 import { enforceAll } from '@/lib/enforcement';
 import { saveUploadedPdf } from '@/lib/file-upload';
 
+// Configure route to accept large files
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+};
+
 export async function POST(request: NextRequest) {
   try {
     // Authenticate and get session
@@ -41,10 +50,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
+    // Validate file size (50MB limit)
+    if (file.size > 50 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'PDF must be under 10MB' },
+        { error: 'PDF must be under 50MB' },
         { status: 400 }
       );
     }
