@@ -1,4 +1,5 @@
 import { readFile } from 'fs/promises';
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 /**
  * Extracts text content from a PDF file
@@ -25,10 +26,24 @@ export async function extractPdfText(pdfPath: string): Promise<string> {
       dataBuffer = await readFile(pdfPath);
     }
 
-    // Dynamic import for CommonJS module
-    const pdfParse = require('pdf-parse');
-    const data = await pdfParse(dataBuffer);
-    return data.text;
+    // Use pdfjs-dist to extract text
+    const loadingTask = pdfjsLib.getDocument({ data: dataBuffer });
+    const pdfDocument = await loadingTask.promise;
+
+    let fullText = '';
+    const numPages = pdfDocument.numPages;
+
+    // Extract text from each page
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdfDocument.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      fullText += pageText + '\n';
+    }
+
+    return fullText.trim();
   } catch (error) {
     console.error('PDF text extraction error:', error);
     throw new Error('Failed to extract text from PDF');
@@ -61,12 +76,14 @@ export async function getPdfMetadata(pdfPath: string): Promise<{
       dataBuffer = await readFile(pdfPath);
     }
 
-    // Dynamic import for CommonJS module
-    const pdfParse = require('pdf-parse');
-    const data = await pdfParse(dataBuffer);
+    // Use pdfjs-dist to get metadata
+    const loadingTask = pdfjsLib.getDocument({ data: dataBuffer });
+    const pdfDocument = await loadingTask.promise;
+    const metadata = await pdfDocument.getMetadata();
+
     return {
-      pages: data.numpages,
-      info: data.info,
+      pages: pdfDocument.numPages,
+      info: metadata.info,
     };
   } catch (error) {
     console.error('PDF metadata extraction error:', error);
