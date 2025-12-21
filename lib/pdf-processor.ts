@@ -2,12 +2,29 @@ import { readFile } from 'fs/promises';
 
 /**
  * Extracts text content from a PDF file
- * @param pdfPath - Absolute path to the PDF file
+ * @param pdfPath - Absolute path to the PDF file or Blob URL
  * @returns Extracted text content
  */
 export async function extractPdfText(pdfPath: string): Promise<string> {
   try {
-    const dataBuffer = await readFile(pdfPath);
+    let dataBuffer: Buffer;
+
+    // Check if it's a Blob URL or local file path
+    if (pdfPath.startsWith('http://') || pdfPath.startsWith('https://')) {
+      // Fetch from Blob storage
+      console.log('Fetching PDF from Blob URL:', pdfPath);
+      const response = await fetch(pdfPath);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PDF from Blob: ${response.statusText}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      dataBuffer = Buffer.from(arrayBuffer);
+    } else {
+      // Read from local file system
+      console.log('Reading PDF from local path:', pdfPath);
+      dataBuffer = await readFile(pdfPath);
+    }
+
     // Dynamic import for CommonJS module
     const pdfParse = require('pdf-parse');
     const data = await pdfParse(dataBuffer);
@@ -20,7 +37,7 @@ export async function extractPdfText(pdfPath: string): Promise<string> {
 
 /**
  * Gets metadata about a PDF file
- * @param pdfPath - Absolute path to the PDF file
+ * @param pdfPath - Absolute path to the PDF file or Blob URL
  * @returns PDF metadata
  */
 export async function getPdfMetadata(pdfPath: string): Promise<{
@@ -28,7 +45,22 @@ export async function getPdfMetadata(pdfPath: string): Promise<{
   info: any;
 }> {
   try {
-    const dataBuffer = await readFile(pdfPath);
+    let dataBuffer: Buffer;
+
+    // Check if it's a Blob URL or local file path
+    if (pdfPath.startsWith('http://') || pdfPath.startsWith('https://')) {
+      // Fetch from Blob storage
+      const response = await fetch(pdfPath);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch PDF from Blob: ${response.statusText}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      dataBuffer = Buffer.from(arrayBuffer);
+    } else {
+      // Read from local file system
+      dataBuffer = await readFile(pdfPath);
+    }
+
     // Dynamic import for CommonJS module
     const pdfParse = require('pdf-parse');
     const data = await pdfParse(dataBuffer);

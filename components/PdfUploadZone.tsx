@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import { upload } from '@vercel/blob/client';
 
 interface PdfUploadZoneProps {
   onUploadSuccess: (draftId: string) => void;
@@ -51,12 +52,12 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
       return;
     }
 
-    // Validate file size (50MB)
-    const maxSize = 50 * 1024 * 1024;
+    // Validate file size (100MB - reasonable limit for Blob storage)
+    const maxSize = 100 * 1024 * 1024;
     console.log('Checking file size:', file.size, 'vs max:', maxSize, 'Pass?', file.size <= maxSize);
     if (file.size > maxSize) {
       console.error('File size validation failed:', file.size, '>', maxSize);
-      onUploadError('PDF must be under 50MB');
+      onUploadError('PDF must be under 100MB');
       return;
     }
 
@@ -68,37 +69,39 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
     setIsUploading(true);
 
     try {
-      console.log('Creating FormData and appending file...');
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('name', finalName);
-      if (description.trim()) {
-        formData.append('description', description.trim());
-      }
+      console.log('Uploading to Vercel Blob...');
 
-      console.log('Sending POST request to /api/ai-bom/upload...');
-      const response = await fetch('/api/ai-bom/upload', {
-        method: 'POST',
-        body: formData,
+      // Upload directly to Vercel Blob (bypasses serverless function limits)
+      const blob = await upload(file.name, file, {
+        access: 'public',
+        handleUploadUrl: '/api/ai-bom/upload-url',
       });
-      console.log('Response received. Status:', response.status, 'OK:', response.ok);
 
-      // Check if response is JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        // Non-JSON response (likely an error from proxy/server)
-        const text = await response.text();
-        if (text.includes('Request Entity Too Large') || text.includes('PayloadTooLargeError')) {
-          throw new Error('File is too large for upload. Please use a smaller PDF (under 50MB).');
-        }
-        throw new Error(`Upload failed: ${text.substring(0, 100)}...`);
-      }
+      console.log('File uploaded to Blob:', blob.url);
+
+      // Now create the BOM draft with the blob URL
+      console.log('Creating BOM draft...');
+      const response = await fetch('/api/ai-bom/create-draft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          blobUrl: blob.url,
+          fileName: file.name,
+          fileSize: file.size,
+          name: finalName,
+          description: description.trim() || null,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
+        throw new Error(data.error || 'Draft creation failed');
       }
+
+      console.log('BOM draft created:', data.bomDraft.id);
 
       // Reset form
       setBomName('');
@@ -195,7 +198,7 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
               or drag and drop
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              PDF files only, up to 50MB
+              PDF files only, up to 100MB
             </p>
           </div>
         )}
