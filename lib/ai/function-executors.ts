@@ -23,6 +23,9 @@ const normalizeSearchTerm = (term: string): string[] => {
   const normalized = term.toLowerCase().trim();
   const variations: string[] = [normalized];
 
+  // Extract key components for broader matching
+  const components: string[] = [];
+
   // Handle wire gauge variations (#4, number 4, no 4, etc.)
   const wireGaugeMatch = normalized.match(/(?:number|no\.?|#)\s*(\d+)/);
   if (wireGaugeMatch) {
@@ -30,31 +33,53 @@ const normalizeSearchTerm = (term: string): string[] => {
     variations.push(`#${gauge}`);
     variations.push(`${gauge} awg`);
     variations.push(`number ${gauge}`);
+    components.push(gauge); // Just the number
   }
 
   // Handle conduit sizes (3/4, 3/4", three quarter, etc.)
   const fractionMatch = normalized.match(/(\d+)\/(\d+)/);
   if (fractionMatch) {
-    variations.push(`${fractionMatch[1]}/${fractionMatch[2]}`);
-    variations.push(`${fractionMatch[1]}/${fractionMatch[2]}"`);
-    variations.push(`${fractionMatch[1]}/${fractionMatch[2]}" `);
+    const frac = `${fractionMatch[1]}/${fractionMatch[2]}`;
+    variations.push(frac);
+    variations.push(`${frac}"`);
+    variations.push(`${frac}" `);
+    components.push(frac); // Just the fraction
   }
 
-  // Handle common abbreviations
-  const abbrevMap: Record<string, string[]> = {
-    'emt': ['emt conduit', 'electrical metallic tubing'],
-    'pvc': ['pvc conduit', 'polyvinyl chloride'],
-    'mc': ['mc cable', 'metal clad'],
-    'romex': ['nm cable', 'non-metallic'],
-    'thhn': ['thhn wire', 'thwn'],
-    'wire': ['cable', 'conductor'],
-  };
+  // Extract product type keywords
+  if (normalized.includes('emt')) {
+    variations.push('emt conduit', 'electrical metallic tubing', 'emt');
+    components.push('emt');
+  }
+  if (normalized.includes('pvc')) {
+    variations.push('pvc conduit', 'pvc');
+    components.push('pvc');
+  }
+  if (normalized.includes('mc')) {
+    variations.push('mc cable', 'metal clad', 'mc');
+    components.push('mc');
+  }
+  if (normalized.includes('romex')) {
+    variations.push('nm cable', 'non-metallic', 'romex');
+    components.push('romex');
+  }
+  if (normalized.includes('thhn') || normalized.includes('thwn')) {
+    variations.push('thhn', 'thwn', 'thhn wire', 'thwn wire');
+    components.push('thhn');
+  }
+  if (normalized.includes('wire') || normalized.includes('cable')) {
+    variations.push('wire', 'cable', 'conductor');
+  }
+  if (normalized.includes('conduit')) {
+    variations.push('conduit');
+    components.push('conduit');
+  }
 
-  Object.entries(abbrevMap).forEach(([abbrev, expansions]) => {
-    if (normalized.includes(abbrev)) {
-      expansions.forEach(exp => variations.push(normalized.replace(abbrev, exp)));
-    }
-  });
+  // Add component combinations for items like "3/4 emt"
+  if (components.length >= 2) {
+    // For "3/4 emt", also try just "3/4" and just "emt"
+    components.forEach(comp => variations.push(comp));
+  }
 
   return [...new Set(variations)]; // Remove duplicates
 };
