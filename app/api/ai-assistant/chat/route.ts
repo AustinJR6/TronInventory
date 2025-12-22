@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
     let aiResponse =
       `Hi, I'm Lana. I can help with inventory and orders. What would you like to do next?`;
     let toolCalls: any[] | null = null;
+    let proposedActions: any[] = [];
+    let executedActions: any[] = [];
 
     if (process.env.OPENAI_API_KEY) {
       const messagesForOpenAI = [
@@ -90,6 +92,7 @@ export async function POST(request: NextRequest) {
         ),
       ];
 
+      // First API call - AI decides what functions to call
       const completion = await openai.chat.completions.create({
         model: AI_MODELS.chat,
         temperature: AI_DEFAULTS.temperature,
@@ -107,8 +110,72 @@ export async function POST(request: NextRequest) {
       });
 
       const choice = completion.choices[0];
-      aiResponse = choice.message.content || aiResponse;
       toolCalls = choice.message.tool_calls || null;
+
+      // Execute the function calls
+      const functionResults = await handleFunctionCalls(toolCalls || [], {
+        userId,
+        companyId,
+        branchId,
+        userRole: userRole as any,
+        conversationId: conversation.id,
+      });
+
+      proposedActions = functionResults.proposedActions;
+      executedActions = functionResults.executedActions;
+
+      // If there were function calls, do a second API call with the results
+      if (toolCalls && toolCalls.length > 0) {
+        const messagesWithResults = [
+          ...messagesForOpenAI,
+          {
+            role: 'assistant',
+            content: choice.message.content,
+            tool_calls: toolCalls,
+          },
+          // Add the function results
+          ...toolCalls.map((toolCall: any) => {
+            const fnName = toolCall.function.name;
+            // Find the corresponding executed or proposed action
+            const action = [...executedActions, ...proposedActions].find(
+              (a: any) => a.actionType === fnName
+            );
+
+            let result;
+            if (action?.executedData) {
+              // Read-only function that was executed
+              result = JSON.parse(action.executedData);
+            } else if (action?.status === 'PROPOSED') {
+              // Write function that needs confirmation
+              result = {
+                status: 'pending_confirmation',
+                message: 'Action proposed and awaiting user confirmation',
+              };
+            } else {
+              result = { error: 'Function execution failed' };
+            }
+
+            return {
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              content: JSON.stringify(result),
+            };
+          }),
+        ];
+
+        // Second API call - AI responds based on function results
+        const finalCompletion = await openai.chat.completions.create({
+          model: AI_MODELS.chat,
+          temperature: AI_DEFAULTS.temperature,
+          max_tokens: AI_DEFAULTS.maxTokens,
+          messages: messagesWithResults as any,
+        });
+
+        aiResponse = finalCompletion.choices[0].message.content || aiResponse;
+      } else {
+        // No function calls, use the original response
+        aiResponse = choice.message.content || aiResponse;
+      }
     }
 
     const assistantMessage = await prisma.aiMessage.create({
@@ -126,14 +193,6 @@ export async function POST(request: NextRequest) {
         lastMessageAt: new Date(),
         status: 'ACTIVE',
       },
-    });
-
-    const { proposedActions, executedActions } = await handleFunctionCalls(toolCalls || [], {
-      userId,
-      companyId,
-      branchId,
-      userRole: userRole as any,
-      conversationId: conversation.id,
     });
 
     return NextResponse.json({
