@@ -69,6 +69,21 @@ export async function handleFunctionCalls(
       parsedArgs
     );
 
+    // Check if action already exists (idempotency check)
+    const existingAction = await prisma.aiAction.findUnique({
+      where: { idempotencyKey },
+    });
+
+    if (existingAction) {
+      // Action already exists, use it instead of creating a new one
+      if (existingAction.status === 'EXECUTED' || existingAction.status === 'FAILED') {
+        executedActions.push(existingAction);
+      } else {
+        proposedActions.push(existingAction);
+      }
+      continue;
+    }
+
     // Check if this is a read-only function
     const isReadOnly = READ_ONLY_FUNCTIONS.includes(fnName);
 
