@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client';
  */
 
 // Models that require company scoping (PascalCase to match Prisma extension format)
+// Note: AiMessage is excluded because it inherits company scope through AiConversation relation
 const TENANT_MODELS = [
   'User',
   'Branch',
@@ -21,7 +22,6 @@ const TENANT_MODELS = [
   'PartRequest',
   'BomDraft',
   'AiConversation',
-  'AiMessage',
   'AiAction',
   'AuditLog',
 ];
