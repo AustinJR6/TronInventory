@@ -15,6 +15,50 @@ const ensureRole = (functionName: string, role: UserRole, required: UserRole[]) 
   }
 };
 
+/**
+ * Normalize search terms for better matching
+ * Converts common variations to standardized forms
+ */
+const normalizeSearchTerm = (term: string): string[] => {
+  const normalized = term.toLowerCase().trim();
+  const variations: string[] = [normalized];
+
+  // Handle wire gauge variations (#4, number 4, no 4, etc.)
+  const wireGaugeMatch = normalized.match(/(?:number|no\.?|#)\s*(\d+)/);
+  if (wireGaugeMatch) {
+    const gauge = wireGaugeMatch[1];
+    variations.push(`#${gauge}`);
+    variations.push(`${gauge} awg`);
+    variations.push(`number ${gauge}`);
+  }
+
+  // Handle conduit sizes (3/4, 3/4", three quarter, etc.)
+  const fractionMatch = normalized.match(/(\d+)\/(\d+)/);
+  if (fractionMatch) {
+    variations.push(`${fractionMatch[1]}/${fractionMatch[2]}`);
+    variations.push(`${fractionMatch[1]}/${fractionMatch[2]}"`);
+    variations.push(`${fractionMatch[1]}/${fractionMatch[2]}" `);
+  }
+
+  // Handle common abbreviations
+  const abbrevMap: Record<string, string[]> = {
+    'emt': ['emt conduit', 'electrical metallic tubing'],
+    'pvc': ['pvc conduit', 'polyvinyl chloride'],
+    'mc': ['mc cable', 'metal clad'],
+    'romex': ['nm cable', 'non-metallic'],
+    'thhn': ['thhn wire', 'thwn'],
+    'wire': ['cable', 'conductor'],
+  };
+
+  Object.entries(abbrevMap).forEach(([abbrev, expansions]) => {
+    if (normalized.includes(abbrev)) {
+      expansions.forEach(exp => variations.push(normalized.replace(abbrev, exp)));
+    }
+  });
+
+  return [...new Set(variations)]; // Remove duplicates
+};
+
 export async function executeAiFunction(
   functionName: string,
   args: any,
@@ -33,10 +77,22 @@ export async function executeAiFunction(
     switch (functionName) {
       case 'check_inventory': {
         const branchFilter = args.branchId ?? context.branchId;
+        const searchTerm = args.itemName || '';
+
+        // Generate search variations
+        const searchVariations = normalizeSearchTerm(searchTerm);
+
+        // Search with OR conditions for all variations
         const items = await prisma.warehouseInventory.findMany({
           where: {
-            itemName: { contains: args.itemName, mode: 'insensitive' },
-            branchId: branchFilter ?? undefined,
+            AND: [
+              { branchId: branchFilter ?? undefined },
+              {
+                OR: searchVariations.map((variation: string) => ({
+                  itemName: { contains: variation, mode: 'insensitive' }
+                }))
+              }
+            ]
           },
           select: {
             id: true,
@@ -50,7 +106,36 @@ export async function executeAiFunction(
           take: 20,
         });
 
-        return { success: true, data: { items } };
+        // If no results with variations, try individual keywords
+        if (items.length === 0) {
+          const keywords = searchTerm.toLowerCase().split(/\s+/).filter((k: string) => k.length > 2);
+          const keywordItems = await prisma.warehouseInventory.findMany({
+            where: {
+              AND: [
+                { branchId: branchFilter ?? undefined },
+                {
+                  OR: keywords.map((keyword: string) => ({
+                    itemName: { contains: keyword, mode: 'insensitive' }
+                  }))
+                }
+              ]
+            },
+            select: {
+              id: true,
+              itemName: true,
+              category: true,
+              unit: true,
+              currentQty: true,
+              parLevel: true,
+              branchId: true,
+            },
+            take: 20,
+          });
+
+          return { success: true, data: { items: keywordItems, searchedFor: searchTerm } };
+        }
+
+        return { success: true, data: { items, searchedFor: searchTerm } };
       }
 
       case 'get_inventory_details': {
