@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const proposedActions = await handleFunctionCalls(toolCalls || [], {
+    const { proposedActions, executedActions } = await handleFunctionCalls(toolCalls || [], {
       userId,
       companyId,
       branchId,
@@ -140,6 +140,7 @@ export async function POST(request: NextRequest) {
       conversationId: conversation.id,
       aiResponse,
       proposedActions,
+      executedActions,
       requiresConfirmation: proposedActions.length > 0,
       assistantMessage,
       topic: conversation.topic,

@@ -22,6 +22,8 @@ type AiAction = {
   proposedData?: string | null;
 };
 
+type PendingActions = AiAction[];
+
 const WELCOME_MESSAGE: Message = {
   id: 'welcome',
   role: 'ASSISTANT',
@@ -38,7 +40,7 @@ export default function AiAssistantPage() {
     WELCOME_MESSAGE,
   ]);
   const [actions, setActions] = useState<AiAction[]>([]);
-  const [pendingAction, setPendingAction] = useState<AiAction | null>(null);
+  const [pendingActions, setPendingActions] = useState<PendingActions>([]);
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -147,12 +149,16 @@ export default function AiAssistantPage() {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-      setActions(data.proposedActions || []);
-      setPendingAction(
-        data.requiresConfirmation && data.proposedActions?.length
-          ? data.proposedActions[0]
-          : null
-      );
+
+      // Combine executed and proposed actions
+      const allActions = [
+        ...(data.executedActions || []),
+        ...(data.proposedActions || []),
+      ];
+      setActions(allActions);
+
+      // Show confirmation modal only for proposed (write) actions
+      setPendingActions(data.proposedActions || []);
       if (!conversations.find((c) => c.id === data.conversationId)) {
         setConversations((prev) => [
           { id: data.conversationId, topic: data.topic || 'general', status: 'ACTIVE', lastMessageAt: new Date().toISOString() },
@@ -167,48 +173,67 @@ export default function AiAssistantPage() {
   };
 
   const handleConfirm = async () => {
-    if (!pendingAction) return;
-    try {
-      const response = await fetch('/api/ai-assistant/confirm-action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actionId: pendingAction.id, confirmed: true }),
-      });
+    if (pendingActions.length === 0) return;
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to confirm action');
+    try {
+      // Confirm all pending actions in parallel
+      const confirmPromises = pendingActions.map((action) =>
+        fetch('/api/ai-assistant/confirm-action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actionId: action.id, confirmed: true }),
+        }).then((res) => res.json())
+      );
+
+      const results = await Promise.all(confirmPromises);
+
+      // Check if any failed
+      const failedResults = results.filter((r) => !r.success);
+      if (failedResults.length > 0) {
+        throw new Error(failedResults[0].error || 'Failed to confirm actions');
       }
 
+      // Update all action statuses
       setActions((prev) =>
-        prev.map((a) => (a.id === pendingAction.id ? { ...a, status: data.action.status } : a))
+        prev.map((a) => {
+          const result = results.find((r) => r.action?.id === a.id);
+          return result ? { ...a, status: result.action.status } : a;
+        })
       );
-      setPendingAction(null);
+
+      setPendingActions([]);
     } catch (err: any) {
-      setError(err.message || 'Failed to confirm action');
+      setError(err.message || 'Failed to confirm actions');
     }
   };
 
   const handleCancel = async () => {
-    if (!pendingAction) return;
+    if (pendingActions.length === 0) return;
+
     try {
-      const response = await fetch('/api/ai-assistant/confirm-action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ actionId: pendingAction.id, confirmed: false }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to cancel action');
-      }
-
-      setActions((prev) =>
-        prev.map((a) => (a.id === pendingAction.id ? { ...a, status: 'CANCELLED' } : a))
+      // Cancel all pending actions in parallel
+      const cancelPromises = pendingActions.map((action) =>
+        fetch('/api/ai-assistant/confirm-action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ actionId: action.id, confirmed: false }),
+        }).then((res) => res.json())
       );
-      setPendingAction(null);
+
+      await Promise.all(cancelPromises);
+
+      // Update all action statuses to CANCELLED
+      setActions((prev) =>
+        prev.map((a) =>
+          pendingActions.some((pa) => pa.id === a.id)
+            ? { ...a, status: 'CANCELLED' }
+            : a
+        )
+      );
+
+      setPendingActions([]);
     } catch (err: any) {
-      setError(err.message || 'Failed to cancel action');
+      setError(err.message || 'Failed to cancel actions');
     }
   };
 
@@ -253,7 +278,7 @@ export default function AiAssistantPage() {
               setConversationId(null);
               setMessages([WELCOME_MESSAGE]);
               setActions([]);
-              setPendingAction(null);
+              setPendingActions([]);
             }}
             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700"
           >
@@ -314,7 +339,7 @@ export default function AiAssistantPage() {
       </section>
 
       <ConfirmationModal
-        action={pendingAction}
+        actions={pendingActions}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />

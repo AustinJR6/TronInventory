@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import { AI_FUNCTIONS } from './function-definitions';
 import { withCompanyScope } from '../prisma-middleware';
+import { executeAiFunction } from './function-executors';
 import type { UserRole } from '@prisma/client';
 
 type FunctionCall =
@@ -13,6 +14,14 @@ type UserContext = {
   userRole: UserRole;
   conversationId: string;
 };
+
+// Read-only functions that don't need user confirmation
+const READ_ONLY_FUNCTIONS = [
+  'check_inventory',
+  'get_inventory_details',
+  'get_my_orders',
+  'search_orders',
+];
 
 const buildIdempotencyKey = (
   userId: string,
@@ -31,7 +40,8 @@ export async function handleFunctionCalls(
   context: UserContext
 ) {
   const prisma = withCompanyScope(context.companyId);
-  const actions = [];
+  const proposedActions = [];
+  const executedActions = [];
 
   for (const call of functionCalls) {
     const fnName = 'function' in call ? call.function.name : call.name;
@@ -59,20 +69,54 @@ export async function handleFunctionCalls(
       parsedArgs
     );
 
-    const action = await prisma.aiAction.create({
-      data: {
-        conversationId: context.conversationId,
-        companyId: context.companyId,
-        userId: context.userId,
-        actionType: fnName,
-        status: 'PROPOSED',
-        proposedData: JSON.stringify(parsedArgs),
-        idempotencyKey,
-      },
-    });
+    // Check if this is a read-only function
+    const isReadOnly = READ_ONLY_FUNCTIONS.includes(fnName);
 
-    actions.push(action);
+    if (isReadOnly) {
+      // Execute read-only functions immediately without confirmation
+      const executionResult = await executeAiFunction(fnName, parsedArgs, {
+        userId: context.userId,
+        companyId: context.companyId,
+        branchId: context.branchId,
+        userRole: context.userRole,
+      });
+
+      const action = await prisma.aiAction.create({
+        data: {
+          conversationId: context.conversationId,
+          companyId: context.companyId,
+          userId: context.userId,
+          actionType: fnName,
+          status: executionResult.success ? 'EXECUTED' : 'FAILED',
+          proposedData: JSON.stringify(parsedArgs),
+          executedData: executionResult.success
+            ? JSON.stringify(executionResult.data ?? {})
+            : null,
+          errorMessage: executionResult.success ? null : executionResult.error,
+          idempotencyKey,
+          confirmedAt: new Date(),
+          executedAt: new Date(),
+        },
+      });
+
+      executedActions.push(action);
+    } else {
+      // Propose write operations for user confirmation
+      const action = await prisma.aiAction.create({
+        data: {
+          conversationId: context.conversationId,
+          companyId: context.companyId,
+          userId: context.userId,
+          actionType: fnName,
+          status: 'PROPOSED',
+          proposedData: JSON.stringify(parsedArgs),
+          idempotencyKey,
+        },
+      });
+
+      proposedActions.push(action);
+    }
   }
 
-  return actions;
+  return { proposedActions, executedActions };
 }
