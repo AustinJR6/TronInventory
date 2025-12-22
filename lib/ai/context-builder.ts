@@ -34,7 +34,12 @@ export function buildConversationContext(
     `- The check_inventory function handles variations automatically - just pass the user's natural language.`,
     `- When items are found, present them clearly with: name, current quantity, and unit.`,
     `- If no exact matches, check_inventory will try keyword matching automatically.`,
-    `- For orders, you MUST use actual item IDs from inventory search results.`,
+    ``,
+    `CRITICAL for create_order:`,
+    `- You MUST use the "id" field from check_inventory results as "itemId"`,
+    `- NEVER use itemName, category, or any other field as itemId`,
+    `- Example: if check_inventory returns {id: "abc123", itemName: "#4 Wire"}, use "abc123" as itemId`,
+    `- orderType must be one of: AD_HOC, WEEKLY_STOCK, or TRANSFER (use AD_HOC for most orders)`,
     ``,
     `Recent messages:\n${history || 'No history yet.'}`,
   ].join('\n');

@@ -24,7 +24,7 @@ export const AI_FUNCTIONS: Record<string, AiFunctionDefinition> = {
   },
   create_order: {
     name: 'create_order',
-    description: 'Creates a draft order for confirmation',
+    description: 'Creates a draft order for confirmation. Use AD_HOC for regular orders, WEEKLY_STOCK for scheduled stock orders, TRANSFER for branch transfers.',
     parameters: {
       type: 'object',
       properties: {
@@ -33,13 +33,17 @@ export const AI_FUNCTIONS: Record<string, AiFunctionDefinition> = {
           items: {
             type: 'object',
             properties: {
-              itemId: { type: 'string' },
-              quantity: { type: 'integer' },
+              itemId: { type: 'string', description: 'The warehouse inventory item ID from check_inventory results' },
+              quantity: { type: 'integer', description: 'Quantity to order' },
             },
             required: ['itemId', 'quantity'],
           },
         },
-        orderType: { type: 'string' },
+        orderType: {
+          type: 'string',
+          enum: ['AD_HOC', 'WEEKLY_STOCK', 'TRANSFER'],
+          description: 'Order type - use AD_HOC for most orders'
+        },
         notes: { type: 'string', nullable: true },
       },
       required: ['items', 'orderType'],
