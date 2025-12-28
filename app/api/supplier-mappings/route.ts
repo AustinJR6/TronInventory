@@ -18,8 +18,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
-      requiredRoles: ['ADMIN', 'WAREHOUSE'],
-      requiredFeatures: ['purchaseOrders'],
+      role: ['ADMIN', 'WAREHOUSE'],
     });
 
     const prisma = withCompanyScope(companyId);
@@ -90,8 +89,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
-      requiredRoles: ['ADMIN', 'WAREHOUSE'],
-      requiredFeatures: ['purchaseOrders'],
+      role: ['ADMIN', 'WAREHOUSE'],
     });
 
     const prisma = withCompanyScope(companyId);

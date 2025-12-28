@@ -17,8 +17,7 @@ export async function GET(
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
-      requiredRoles: ['ADMIN', 'WAREHOUSE'],
-      requiredFeatures: ['purchaseOrders'],
+      role: ['ADMIN', 'WAREHOUSE'],
     });
 
     const { id } = await params;
@@ -82,8 +81,7 @@ export async function PATCH(
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
-      requiredRoles: ['ADMIN'],
-      requiredFeatures: ['purchaseOrders'],
+      role: 'ADMIN',
     });
 
     const { id } = await params;
@@ -183,8 +181,7 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
-      requiredRoles: ['ADMIN'],
-      requiredFeatures: ['purchaseOrders'],
+      role: 'ADMIN',
     });
 
     const { id } = await params;
