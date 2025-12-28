@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 45, 45, 45;
-  --background-rgb: 255, 245, 235;
+  --foreground-rgb: 26, 75, 115; /* ocean-text */
+  --background-rgb: 230, 243, 255; /* ocean-sky */
 }
 
 .dark {
-  --foreground-rgb: 255, 255, 255;
-  --background-rgb: 10, 10, 10;
+  --foreground-rgb: 227, 242, 253; /* ocean-text-dark */
+  --background-rgb: 10, 25, 41; /* deep-ocean */
 }
 
 body {
@@ -20,60 +20,60 @@ body {
 
 /* Input styling for both themes */
 input, select, textarea {
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dark input,
 .dark select,
 .dark textarea {
-  background-color: #2A2A2A;
-  color: #FFFFFF !important;
-  border-color: rgba(255, 107, 0, 0.3);
+  background-color: rgba(46, 92, 138, 0.5); /* ocean-deep/50 */
+  color: #E3F2FD !important; /* ocean-text-dark */
+  border-color: rgba(79, 195, 247, 0.3); /* starlight/30 */
 }
 
 input,
 select,
 textarea {
-  background-color: #FFFFFF;
-  color: #2D2D2D !important;
-  border-color: rgba(255, 179, 128, 0.4);
+  background-color: #F0F8FF; /* foam */
+  color: #1A4B73 !important; /* ocean-text */
+  border-color: rgba(74, 144, 226, 0.3); /* ocean-medium/30 */
 }
 
 input::placeholder,
 select::placeholder,
 textarea::placeholder {
-  color: #9CA3AF;
+  color: #5C7A99; /* ocean-muted */
 }
 
 .dark input::placeholder,
 .dark select::placeholder,
 .dark textarea::placeholder {
-  color: #9CA3AF;
+  color: #90CAF9; /* ocean-muted-dark */
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-sherbet-orange dark:bg-tron-orange hover:bg-sherbet-orange-dark dark:hover:bg-tron-orange-light text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200;
+    @apply bg-ocean-accent dark:bg-starlight hover:bg-ocean-medium dark:hover:bg-starlight-glow text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 dark:animate-glow shadow-lg;
   }
 
   .btn-secondary {
-    @apply bg-cream-dark dark:bg-tron-gray-light hover:bg-cream dark:hover:bg-tron-gray text-text-light dark:text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 border border-sherbet-orange dark:border-tron-orange;
+    @apply bg-ocean-light dark:bg-ocean-deep hover:bg-ocean-medium dark:hover:bg-ocean-deep/80 text-ocean-text dark:text-ocean-text-dark font-semibold py-2 px-4 rounded-lg transition-all duration-300 border border-ocean-accent dark:border-starlight transform hover:scale-105;
   }
 
   .card {
-    @apply bg-white dark:bg-tron-gray rounded-lg shadow-md p-6 border border-sherbet-orange/20 dark:border-tron-orange/20 transition-all duration-200;
+    @apply bg-white/90 dark:bg-ocean-dark/90 rounded-lg shadow-xl p-6 border border-ocean-medium/30 dark:border-starlight/30 backdrop-blur-sm transition-all duration-300 animate-breathe-slow;
   }
 
   .input-field {
-    @apply w-full px-3 py-2 border border-sherbet-orange/30 dark:border-tron-orange/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sherbet-orange dark:focus:ring-tron-orange focus:border-transparent bg-white dark:bg-tron-gray-light text-text-light dark:text-white transition-all duration-200;
+    @apply w-full px-3 py-2 border border-ocean-medium/30 dark:border-starlight/30 rounded-md focus:outline-none focus:ring-2 focus:ring-ocean-accent dark:focus:ring-starlight focus:border-transparent bg-foam dark:bg-ocean-deep/50 text-ocean-text dark:text-ocean-text-dark transition-all duration-300;
   }
 
   .input {
-    @apply w-full px-3 py-2 border border-sherbet-orange/30 dark:border-tron-orange/30 rounded-md focus:outline-none focus:ring-2 focus:ring-sherbet-orange dark:focus:ring-tron-orange focus:border-transparent bg-white dark:bg-tron-gray-light text-text-light dark:text-white transition-all duration-200;
+    @apply w-full px-3 py-2 border border-ocean-medium/30 dark:border-starlight/30 rounded-md focus:outline-none focus:ring-2 focus:ring-ocean-accent dark:focus:ring-starlight focus:border-transparent bg-foam dark:bg-ocean-deep/50 text-ocean-text dark:text-ocean-text-dark transition-all duration-300;
   }
 
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-all duration-200;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-all duration-300 transform hover:scale-105;
   }
 
   .badge-submitted {

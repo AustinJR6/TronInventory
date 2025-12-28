@@ -85,7 +85,7 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
   const primaryBorderHoverClass = 'hover:border-[var(--color-primary,#FF6B35)]/50';
 
   return (
-    <nav className="bg-white dark:bg-tron-black shadow-lg border-b border-sherbet-orange/30 dark:border-tron-orange/30 transition-all duration-200">
+    <nav className="bg-white/90 dark:bg-ocean-dark/95 shadow-lg border-b border-ocean-medium/30 dark:border-starlight/30 transition-all duration-200 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
@@ -94,10 +94,10 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
                 <img
                   src={branding.logoUrl}
                   alt={`${branding.companyName} Logo`}
-                  className="h-12 w-auto max-w-[120px] object-contain"
+                  className="h-12 w-auto max-w-[120px] object-contain animate-float"
                 />
               ) : (
-                <div className="text-xl font-bold text-text-light dark:text-white">
+                <div className="text-xl font-bold text-ocean-text dark:text-ocean-text-dark">
                   {branding.appName || branding.companyName}
                 </div>
               )}
@@ -107,10 +107,10 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-all duration-200 ${
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
                     pathname === item.href
-                      ? `${primaryBorderClass} text-sherbet-orange dark:text-tron-orange`
-                      : `border-transparent text-text-light-muted dark:text-gray-300 hover:border-sherbet-orange/50 dark:hover:border-tron-orange/50 hover:text-sherbet-orange dark:hover:text-white`
+                      ? `border-ocean-accent dark:border-starlight text-ocean-accent dark:text-starlight font-semibold dark:drop-shadow-[0_0_8px_rgba(79,195,247,0.6)]`
+                      : `border-transparent text-ocean-muted dark:text-ocean-muted-dark hover:border-ocean-accent/50 dark:hover:border-starlight/50 hover:text-ocean-accent dark:hover:text-starlight`
                   }`}
                 >
                   {item.label}
@@ -123,17 +123,17 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-cream-dark dark:hover:bg-tron-gray transition-all duration-200"
+                className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-ocean-light/20 dark:hover:bg-ocean-deep/50 transition-all duration-300 transform hover:scale-105"
               >
                 <div className="text-sm text-right">
-                  <p className="font-medium text-text-light dark:text-white">{userName}</p>
-                  <p className="text-xs text-sherbet-orange dark:text-tron-orange">
+                  <p className="font-medium text-ocean-text dark:text-ocean-text-dark">{userName}</p>
+                  <p className="text-xs text-ocean-accent dark:text-starlight">
                     {role}
                     {vehicleNumber && ` - Vehicle ${vehicleNumber}`}
                   </p>
                 </div>
                 <svg
-                  className="w-4 h-4 text-sherbet-orange dark:text-tron-orange transition-transform duration-200"
+                  className="w-4 h-4 text-ocean-accent dark:text-starlight transition-transform duration-300"
                   style={{ transform: isProfileOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
                   fill="none"
                   stroke="currentColor"
@@ -144,11 +144,11 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
               </button>
 
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-tron-gray rounded-md shadow-lg py-1 z-50 border border-sherbet-orange/30 dark:border-tron-orange/30 transition-all duration-200">
+                <div className="absolute right-0 mt-2 w-48 bg-white/95 dark:bg-ocean-dark/95 rounded-md shadow-2xl py-1 z-50 border border-ocean-medium/30 dark:border-starlight/30 backdrop-blur-sm animate-breathe">
                   {role === 'ADMIN' && (
                     <Link
                       href="/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-text-light dark:text-gray-200 hover:bg-cream dark:hover:bg-tron-gray-light hover:text-sherbet-orange dark:hover:text-tron-orange transition-all duration-200"
+                      className="block px-4 py-2 text-sm text-ocean-text dark:text-ocean-text-dark hover:bg-ocean-light/20 dark:hover:bg-ocean-deep/50 hover:text-ocean-accent dark:hover:text-starlight transition-all duration-300 transform hover:translate-x-1"
                       onClick={() => setIsProfileOpen(false)}
                     >
                       Company Settings
@@ -156,14 +156,14 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
                   )}
                   <Link
                     href="/dashboard/update-password"
-                    className="block px-4 py-2 text-sm text-text-light dark:text-gray-200 hover:bg-cream dark:hover:bg-tron-gray-light hover:text-sherbet-orange dark:hover:text-tron-orange transition-all duration-200"
+                    className="block px-4 py-2 text-sm text-ocean-text dark:text-ocean-text-dark hover:bg-ocean-light/20 dark:hover:bg-ocean-deep/50 hover:text-ocean-accent dark:hover:text-starlight transition-all duration-300 transform hover:translate-x-1"
                     onClick={() => setIsProfileOpen(false)}
                   >
                     Update Password
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: '/login' })}
-                    className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-cream dark:hover:bg-tron-gray-light transition-all duration-200"
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-ocean-light/20 dark:hover:bg-ocean-deep/50 transition-all duration-300 transform hover:translate-x-1"
                   >
                     Sign Out
                   </button>
@@ -175,16 +175,16 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       </div>
 
       {/* Mobile menu */}
-      <div className="sm:hidden border-t border-tron-orange/30">
+      <div className="sm:hidden border-t border-ocean-medium/30 dark:border-starlight/30">
         <div className="pt-2 pb-3 space-y-1">
           {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+              className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-300 ${
                 pathname === item.href
-                  ? `${primaryBorderClass} bg-tron-gray ${primaryColorClass}`
-                  : `border-transparent text-gray-300 hover:bg-tron-gray ${primaryBorderHoverClass} hover:text-white`
+                  ? `border-ocean-accent dark:border-starlight bg-ocean-light/20 dark:bg-ocean-deep/50 text-ocean-accent dark:text-starlight font-semibold`
+                  : `border-transparent text-ocean-muted dark:text-ocean-muted-dark hover:bg-ocean-light/10 dark:hover:bg-ocean-deep/30 hover:border-ocean-accent/50 dark:hover:border-starlight/50 hover:text-ocean-accent dark:hover:text-starlight`
               }`}
             >
               {item.label}

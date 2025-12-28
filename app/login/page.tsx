@@ -37,18 +37,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-tron-black px-4">
-      <div className="max-w-md w-full space-y-8 bg-tron-gray p-8 rounded-xl shadow-lg border border-tron-orange/30">
+    <div className="min-h-screen flex items-center justify-center bg-ocean-gradient dark:bg-ocean-night px-4">
+      <div className="max-w-md w-full space-y-8 bg-white/80 dark:bg-ocean-dark/90 p-8 rounded-xl shadow-2xl border border-ocean-medium/30 dark:border-starlight/30 backdrop-blur-sm animate-breathe-slow">
         <div className="text-center">
           <img
             src="/manifest-logo.png"
             alt="Manifest"
-            className="mx-auto h-32 w-auto mb-4"
+            className="mx-auto h-32 w-auto mb-4 animate-float"
           />
-          <h2 className="text-3xl font-extrabold text-white">
+          <h2 className="text-3xl font-extrabold text-ocean-text dark:text-ocean-text-dark">
             Welcome to Manifest
           </h2>
-          <p className="mt-2 text-sm text-gray-300">
+          <p className="mt-2 text-sm text-ocean-muted dark:text-ocean-muted-dark">
             Sign in to access your inventory system
           </p>
         </div>
@@ -64,7 +64,7 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="input-field"
+                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-ocean-medium/30 dark:border-starlight/30 placeholder-ocean-muted dark:placeholder-ocean-muted-dark text-ocean-text dark:text-ocean-text-dark bg-foam dark:bg-ocean-deep/50 focus:outline-none focus:ring-2 focus:ring-ocean-accent dark:focus:ring-starlight focus:border-transparent transition-all duration-300"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -80,7 +80,7 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="input-field"
+                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-ocean-medium/30 dark:border-starlight/30 placeholder-ocean-muted dark:placeholder-ocean-muted-dark text-ocean-text dark:text-ocean-text-dark bg-foam dark:bg-ocean-deep/50 focus:outline-none focus:ring-2 focus:ring-ocean-accent dark:focus:ring-starlight focus:border-transparent transition-all duration-300"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -98,7 +98,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white font-semibold bg-ocean-accent dark:bg-starlight hover:bg-ocean-medium dark:hover:bg-starlight-glow dark:animate-glow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ocean-accent dark:focus:ring-starlight transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
