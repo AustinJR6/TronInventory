@@ -2,16 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { withCompanyScope } from '@/lib/prisma-middleware';
-import { enforceAll } from '@/lib/enforcement';
+import { enforceAll, getTierLimits } from '@/lib/enforcement';
 import { prisma } from '@/lib/prisma';
-
-// Tier-based branch limits
-const BRANCH_LIMITS = {
-  CORE: 1,
-  OPS: 5,
-  OPS_SCAN: 10,
-  OPS_SCAN_PO: 999, // Unlimited
-};
 
 /**
  * GET /api/branches
@@ -44,16 +36,23 @@ export async function GET(request: NextRequest) {
     // Get license info for tier limits
     const license = await prisma.license.findUnique({
       where: { companyId },
-      select: { tier: true },
+      select: {
+        tier: true,
+        includedBranches: true,
+        additionalBranches: true,
+      },
     });
 
-    const branchLimit = license ? BRANCH_LIMITS[license.tier] : BRANCH_LIMITS.CORE;
+    const tierLimits = license ? getTierLimits(license.tier) : getTierLimits('BASE');
+    const totalBranchLimit = license
+      ? license.includedBranches + license.additionalBranches
+      : tierLimits.includedBranches;
 
     return NextResponse.json({
       branches,
-      branchLimit,
+      branchLimit: totalBranchLimit,
       currentCount: branches.length,
-      canAddMore: branches.length < branchLimit,
+      canAddMore: branches.length < totalBranchLimit,
     });
   } catch (error: any) {
     console.error('Error fetching branches:', error);
@@ -90,7 +89,12 @@ export async function POST(request: NextRequest) {
       scopedPrisma.branch.count({ where: { active: true } }),
       prisma.license.findUnique({
         where: { companyId },
-        select: { tier: true, status: true },
+        select: {
+          tier: true,
+          status: true,
+          includedBranches: true,
+          additionalBranches: true,
+        },
       }),
     ]);
 
@@ -101,12 +105,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const branchLimit = BRANCH_LIMITS[license.tier];
-    if (existingBranches >= branchLimit) {
+    const totalBranchLimit = license.includedBranches + license.additionalBranches;
+    if (existingBranches >= totalBranchLimit) {
       return NextResponse.json(
         {
-          error: `Branch limit reached. Your ${license.tier} tier allows ${branchLimit} branch${branchLimit === 1 ? '' : 'es'}. Upgrade your license to add more branches.`,
-          branchLimit,
+          error: `Branch limit reached. Your ${license.tier} plan allows ${totalBranchLimit} branch${totalBranchLimit === 1 ? '' : 'es'}. Contact support to add more branches ($19.99/month each).`,
+          branchLimit: totalBranchLimit,
           currentCount: existingBranches,
         },
         { status: 403 }
