@@ -39,12 +39,17 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-tron-black px-4">
       <div className="max-w-md w-full space-y-8 bg-tron-gray p-8 rounded-xl shadow-lg border border-tron-orange/30">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            Inventory Management
+        <div className="text-center">
+          <img
+            src="/manifest-logo.png"
+            alt="Manifest"
+            className="mx-auto h-32 w-auto mb-4"
+          />
+          <h2 className="text-3xl font-extrabold text-white">
+            Welcome to Manifest
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-300">
-            Sign in to access the inventory system
+          <p className="mt-2 text-sm text-gray-300">
+            Sign in to access your inventory system
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

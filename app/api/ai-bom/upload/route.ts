@@ -13,7 +13,10 @@ export async function POST(request: NextRequest) {
   try {
     // Authenticate and get session
     const session = await getServerSession(authOptions);
-    const { companyId, userId } = await enforceAll(session, { role: 'FIELD' });
+    const { companyId, userId } = await enforceAll(session, {
+      role: 'FIELD',
+      feature: 'aiBomBuilder',
+    });
     const scopedPrisma = withCompanyScope(companyId);
 
     console.log('Upload request received, parsing form data...');

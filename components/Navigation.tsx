@@ -49,6 +49,9 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard/ai-assistant', label: 'Lana AI' },
       { href: '/dashboard/ai-bom-builder', label: 'AI BOM Builder' },
       { href: '/dashboard/manage-part-requests', label: 'Part Requests' },
+      { href: '/dashboard/distributors', label: 'Distributors' },
+      { href: '/dashboard/supplier-mappings', label: 'Supplier Mappings' },
+      { href: '/dashboard/thresholds', label: 'Thresholds' },
       { href: '/dashboard/branches', label: 'Branches' },
       { href: '/dashboard/bulk-qr', label: 'Bulk QR Codes' },
       { href: '/dashboard/users', label: 'User Management' },
@@ -60,6 +63,8 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard/orders', label: 'Orders' },
       { href: '/dashboard/ai-assistant', label: 'Lana AI' },
       { href: '/dashboard/manage-part-requests', label: 'Part Requests' },
+      { href: '/dashboard/supplier-mappings', label: 'Supplier Mappings' },
+      { href: '/dashboard/thresholds', label: 'Thresholds' },
     ],
     FIELD: [
       { href: '/dashboard', label: 'Dashboard' },

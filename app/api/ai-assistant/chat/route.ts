@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     const { userId, companyId, userRole } = await enforceAll(session, {
+      feature: 'aiAssistant',
       allowReadOnly: true,
     });
 

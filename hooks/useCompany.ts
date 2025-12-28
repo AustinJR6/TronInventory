@@ -11,9 +11,9 @@ export interface Company {
 }
 
 const DEFAULT_BRANDING = {
-  appName: 'Tron Inventory',
-  primaryColor: '#FF6B35', // Tron orange
-  logoUrl: null,
+  appName: 'Manifest',
+  primaryColor: '#1e3a5f', // Navy blue from ship logo
+  logoUrl: '/manifest-logo.png',
 };
 
 /**

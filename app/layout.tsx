@@ -11,8 +11,8 @@ import { Providers } from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Tron Solar Inventory Management',
-  description: 'Warehouse and vehicle inventory management system for Tron Solar',
+  title: 'Manifest - Inventory Management',
+  description: 'AI-powered inventory management system for distributed teams',
 };
 
 export default function RootLayout({

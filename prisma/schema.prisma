@@ -35,10 +35,8 @@ enum LicenseStatus {
 }
 
 enum LicenseTier {
-  CORE
-  OPS
-  OPS_SCAN
-  OPS_SCAN_PO
+  BASE
+  ELITE
 }
 
 enum AiConversationStatus {
@@ -59,6 +57,27 @@ enum AiActionStatus {
   EXECUTED
   FAILED
   CANCELLED
+}
+
+enum POStatus {
+  DRAFT
+  SUBMITTED
+  CONFIRMED
+  PARTIAL_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum JobStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum AllocationType {
+  JOB
+  STOCK
 }
 
 model Company {
@@ -84,20 +103,33 @@ model Company {
   aiConversations       AiConversation[]
   aiActions             AiAction[]
   auditLogs             AuditLog[]
+  distributors          Distributor[]
+  supplierMappings      SupplierItemMapping[]
+  inventoryThresholds   InventoryThreshold[]
+  jobs                  Job[]
+  purchaseOrders        PurchaseOrder[]
+  poReceivingLogs       POReceivingLog[]
 
   @@map("companies")
 }
 
 model License {
-  id        String        @id @default(cuid())
-  companyId String        @unique
-  status    LicenseStatus @default(TRIAL)
-  tier      LicenseTier   @default(CORE)
-  startsAt  DateTime      @default(now())
-  expiresAt DateTime?
-  notes     String?
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id                    String        @id @default(cuid())
+  companyId             String        @unique
+  status                LicenseStatus @default(TRIAL)
+  tier                  LicenseTier   @default(BASE)
+  startsAt              DateTime      @default(now())
+  expiresAt             DateTime?
+  stripeCustomerId      String?       @unique
+  stripeSubscriptionId  String?       @unique
+  stripePriceId         String?
+  includedBranches      Int           @default(1)
+  includedUsers         Int           @default(10)
+  additionalBranches    Int           @default(0)
+  additionalUsers       Int           @default(0)
+  notes                 String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
@@ -117,9 +149,11 @@ model Branch {
   company            Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
   users              User[]
   warehouseInventory WarehouseInventory[]
-  vehicleStocks      VehicleStock[]
-  orders             Order[]
-  aiConversations    AiConversation[]
+  vehicleStocks       VehicleStock[]
+  orders              Order[]
+  aiConversations     AiConversation[]
+  inventoryThresholds InventoryThreshold[]
+  purchaseOrders      PurchaseOrder[]
 
   @@unique([companyId, name])
   @@map("branches")
@@ -142,11 +176,15 @@ model User {
   branch        Branch?        @relation(fields: [branchId], references: [id])
   orders        Order[]
   vehicleStocks VehicleStock[]
-  partRequests  PartRequest[]
-  bomDrafts     BomDraft[]
+  partRequests    PartRequest[]
+  bomDrafts       BomDraft[]
   aiConversations AiConversation[]
-  aiActions        AiAction[]
-  auditLogs        AuditLog[]
+  aiActions       AiAction[]
+  auditLogs       AuditLog[]
+  createdJobs     Job[]
+  createdPOs      PurchaseOrder[]  @relation("POCreator")
+  submittedPOs    PurchaseOrder[]  @relation("POSubmitter")
+  receivingLogs   POReceivingLog[]
 
   @@unique([companyId, vehicleNumber])
   @@map("users")
@@ -162,15 +200,21 @@ model WarehouseInventory {
   unit        String
   branchId    String?
   sku         String?
-  qrCodeData  String?  @db.Text
-  lastUpdated DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  qrCodeData    String?  @db.Text
+  lastUpdated   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  minLevel      Int?
+  criticalLevel Int?
+  reorderQty    Int?
 
   company               Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
   branch                Branch?                @relation(fields: [branchId], references: [id])
   orderItems            OrderItem[]
   inventoryTransactions InventoryTransaction[]
   bomItems              BomItem[]
+  supplierMappings      SupplierItemMapping[]
+  thresholds            InventoryThreshold[]
+  purchaseOrderItems    PurchaseOrderItem[]
 
   @@unique([companyId, itemName, branchId])
   @@unique([companyId, sku, branchId])
@@ -456,4 +500,179 @@ model AuditLog {
   @@index([companyId, entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model Distributor {
+  id              String   @id @default(cuid())
+  companyId       String
+  name            String
+  contactName     String?
+  email           String?
+  phone           String?
+  website         String?
+  orderingMethod  String?
+  defaultLeadDays Int      @default(0)
+  notes           String?  @db.Text
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company        Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  itemMappings   SupplierItemMapping[]
+  purchaseOrders PurchaseOrder[]
+
+  @@unique([companyId, name])
+  @@map("distributors")
+}
+
+model SupplierItemMapping {
+  id                String   @id @default(cuid())
+  companyId         String
+  warehouseItemId   String
+  distributorId     String
+  supplierSKU       String?
+  packSize          Int      @default(1)
+  unitCost          Decimal  @db.Decimal(10, 2)
+  moq               Int      @default(1)
+  preferredSupplier Boolean  @default(false)
+  leadTimeDays      Int?
+  notes             String?  @db.Text
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  company       Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  warehouseItem WarehouseInventory @relation(fields: [warehouseItemId], references: [id], onDelete: Cascade)
+  distributor   Distributor        @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, warehouseItemId, distributorId])
+  @@map("supplier_item_mappings")
+}
+
+model InventoryThreshold {
+  id              String   @id @default(cuid())
+  companyId       String
+  warehouseItemId String
+  branchId        String?
+  minLevel        Int      @default(0)
+  parLevel        Int
+  criticalLevel   Int      @default(0)
+  reorderQty      Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company       Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  warehouseItem WarehouseInventory @relation(fields: [warehouseItemId], references: [id], onDelete: Cascade)
+  branch        Branch?            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, warehouseItemId, branchId])
+  @@map("inventory_thresholds")
+}
+
+model Job {
+  id                 String     @id @default(cuid())
+  companyId          String
+  jobNumber          String
+  customerName       String
+  customerContact    String?
+  projectName        String?
+  address            String?
+  status             JobStatus  @default(ACTIVE)
+  estimatedValue     Decimal?   @db.Decimal(12, 2)
+  startDate          DateTime?
+  targetEndDate      DateTime?
+  actualEndDate      DateTime?
+  notes              String?    @db.Text
+  createdBy          String
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  completedAt        DateTime?
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  creator            User                @relation(fields: [createdBy], references: [id])
+  purchaseOrderItems PurchaseOrderItem[]
+
+  @@unique([companyId, jobNumber])
+  @@index([companyId, status])
+  @@map("jobs")
+}
+
+model PurchaseOrder {
+  id               String    @id @default(cuid())
+  companyId        String
+  poNumber         String
+  distributorId    String
+  branchId         String?
+  status           POStatus  @default(DRAFT)
+  orderDate        DateTime?
+  expectedDelivery DateTime?
+  actualDelivery   DateTime?
+  totalCost        Decimal   @db.Decimal(12, 2) @default(0)
+  notes            String?   @db.Text
+  createdBy        String
+  submittedBy      String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  submittedAt      DateTime?
+  receivedAt       DateTime?
+
+  company       Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  distributor   Distributor         @relation(fields: [distributorId], references: [id])
+  branch        Branch?             @relation(fields: [branchId], references: [id])
+  creator       User                @relation("POCreator", fields: [createdBy], references: [id])
+  submitter     User?               @relation("POSubmitter", fields: [submittedBy], references: [id])
+  items         PurchaseOrderItem[]
+  receivingLogs POReceivingLog[]
+
+  @@unique([companyId, poNumber])
+  @@index([companyId, status])
+  @@index([companyId, distributorId])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id             String         @id @default(cuid())
+  poId           String
+  warehouseItemId String
+  supplierSKU    String?
+  orderedQty     Int
+  receivedQty    Int            @default(0)
+  packSize       Int            @default(1)
+  unitCost       Decimal        @db.Decimal(10, 2)
+  lineTotalCost  Decimal        @db.Decimal(12, 2)
+  allocationType AllocationType
+  jobId          String?
+  notes          String?        @db.Text
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  purchaseOrder PurchaseOrder      @relation(fields: [poId], references: [id], onDelete: Cascade)
+  warehouseItem WarehouseInventory @relation(fields: [warehouseItemId], references: [id])
+  job           Job?               @relation(fields: [jobId], references: [id])
+  receivingLogs POReceivingLog[]
+
+  @@index([poId])
+  @@index([jobId])
+  @@map("purchase_order_items")
+}
+
+model POReceivingLog {
+  id                String   @id @default(cuid())
+  companyId         String
+  poId              String
+  poItemId          String
+  receivedQty       Int
+  receivedBy        String
+  receivedAt        DateTime @default(now())
+  notes             String?  @db.Text
+  discrepancy       Boolean  @default(false)
+  discrepancyReason String?  @db.Text
+
+  company           Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  purchaseOrder     PurchaseOrder     @relation(fields: [poId], references: [id], onDelete: Cascade)
+  purchaseOrderItem PurchaseOrderItem @relation(fields: [poItemId], references: [id], onDelete: Cascade)
+  receiver          User              @relation(fields: [receivedBy], references: [id])
+
+  @@index([companyId, poId])
+  @@map("po_receiving_logs")
 }

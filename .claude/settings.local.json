@@ -34,7 +34,9 @@
       "Bash(git checkout:*)",
       "Bash(tasklist:*)",
       "Bash(findstr:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(grep:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

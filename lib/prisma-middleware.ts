@@ -24,6 +24,12 @@ const TENANT_MODELS = [
   'AiConversation',
   'AiAction',
   'AuditLog',
+  'Distributor',
+  'SupplierItemMapping',
+  'InventoryThreshold',
+  'Job',
+  'PurchaseOrder',
+  'POReceivingLog',
 ];
 
 /**

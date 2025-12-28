@@ -8,19 +8,15 @@ import type { LicenseStatus, LicenseTier, UserRole } from '@prisma/client';
 
 /**
  * Feature mapping by license tier
+ *
+ * BASE ($49.99/mo): 1 branch, 10 users
+ *   - All core features EXCEPT: PO System, AI BOM Builder, Lana AI
+ *
+ * ELITE ($99.99/mo): 5 branches, 100 users
+ *   - All features including PO System, AI BOM Builder, Lana AI
  */
 const TIER_FEATURES: Record<LicenseTier, string[]> = {
-  CORE: ['inventoryTracking', 'manualAdjustments'],
-
-  OPS: [
-    'inventoryTracking',
-    'manualAdjustments',
-    'orderManagement',
-    'vehicleStock',
-    'roleBasedAccess',
-  ],
-
-  OPS_SCAN: [
+  BASE: [
     'inventoryTracking',
     'manualAdjustments',
     'orderManagement',
@@ -28,19 +24,26 @@ const TIER_FEATURES: Record<LicenseTier, string[]> = {
     'roleBasedAccess',
     'barcodeScanning',
     'qrScanning',
-  ],
-
-  OPS_SCAN_PO: [
-    'inventoryTracking',
-    'manualAdjustments',
-    'orderManagement',
-    'vehicleStock',
-    'roleBasedAccess',
-    'barcodeScanning',
-    'qrScanning',
+    'partRequests',
     'supplierManagement',
+    'inventoryThresholds',
+  ],
+
+  ELITE: [
+    'inventoryTracking',
+    'manualAdjustments',
+    'orderManagement',
+    'vehicleStock',
+    'roleBasedAccess',
+    'barcodeScanning',
+    'qrScanning',
+    'partRequests',
+    'supplierManagement',
+    'inventoryThresholds',
     'purchaseOrders',
     'poCompilation',
+    'aiBomBuilder',
+    'aiAssistant',
   ],
 };
 
@@ -224,4 +227,85 @@ export function getLicenseErrorMessage(error: Error): string {
   }
 
   return 'License validation failed. Please contact support.';
+}
+
+/**
+ * Get tier limits for branches and users
+ */
+export function getTierLimits(tier: LicenseTier): {
+  includedBranches: number;
+  includedUsers: number;
+  price: number;
+} {
+  switch (tier) {
+    case 'BASE':
+      return {
+        includedBranches: 1,
+        includedUsers: 10,
+        price: 49.99,
+      };
+    case 'ELITE':
+      return {
+        includedBranches: 5,
+        includedUsers: 100,
+        price: 99.99,
+      };
+    default:
+      return {
+        includedBranches: 1,
+        includedUsers: 10,
+        price: 49.99,
+      };
+  }
+}
+
+/**
+ * Check if company can add more branches/users
+ */
+export async function checkCapacityLimits(
+  companyId: string,
+  type: 'branch' | 'user'
+): Promise<{
+  allowed: boolean;
+  current: number;
+  limit: number;
+  additionalCost?: number;
+}> {
+  const license = await prisma.license.findUnique({
+    where: { companyId },
+    include: {
+      company: {
+        include: {
+          branches: true,
+          users: { where: { active: true } },
+        },
+      },
+    },
+  });
+
+  if (!license) {
+    throw new Error('No license found');
+  }
+
+  const limits = getTierLimits(license.tier);
+  const totalBranchLimit = limits.includedBranches + license.additionalBranches;
+  const totalUserLimit = limits.includedUsers + license.additionalUsers;
+
+  if (type === 'branch') {
+    const currentBranches = license.company.branches.filter((b) => b.active).length;
+    return {
+      allowed: currentBranches < totalBranchLimit,
+      current: currentBranches,
+      limit: totalBranchLimit,
+      additionalCost: 19.99,
+    };
+  } else {
+    const currentUsers = license.company.users.length;
+    return {
+      allowed: currentUsers < totalUserLimit,
+      current: currentUsers,
+      limit: totalUserLimit,
+      additionalCost: 1.0,
+    };
+  }
 }

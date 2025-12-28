@@ -121,7 +121,7 @@ export default function SettingsPage() {
                   id="appName"
                   value={formData.appName}
                   onChange={(e) => setFormData({ ...formData, appName: e.target.value })}
-                  placeholder="Tron Inventory"
+                  placeholder="Manifest"
                   className="w-full px-3 py-2 bg-tron-black border border-tron-orange/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange"
                 />
                 <p className="mt-1 text-xs text-gray-400">Displayed in navigation and page titles</p>
