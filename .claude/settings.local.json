@@ -37,7 +37,8 @@
       "Bash(npm uninstall:*)",
       "Bash(grep:*)",
       "Bash(dir:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

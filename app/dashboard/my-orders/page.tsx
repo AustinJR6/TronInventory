@@ -73,15 +73,15 @@ export default function MyOrdersPage() {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-900 dark:text-white">Loading orders...</div>;
+    return <div className="text-center py-8 text-ocean-text dark:text-ocean-text-dark">Loading orders...</div>;
   }
 
   return (
     <div>
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">My Orders</h1>
-          <p className="mt-2 text-gray-700 dark:text-gray-300">View and track your order status</p>
+          <h1 className="text-3xl font-bold text-ocean-text dark:text-ocean-text-dark drop-shadow-sm">My Orders</h1>
+          <p className="mt-2 text-ocean-muted dark:text-ocean-muted-dark">View and track your order status</p>
         </div>
         <Link href="/dashboard/new-order" className="btn-primary">
           New Order
@@ -93,8 +93,8 @@ export default function MyOrdersPage() {
           onClick={() => setSelectedStatus('')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             selectedStatus === ''
-              ? 'bg-sherbet-orange dark:bg-tron-orange text-white'
-              : 'bg-cream-dark dark:bg-tron-gray text-text-light dark:text-gray-300 border border-sherbet-orange/30 dark:border-tron-orange/30 hover:bg-cream dark:hover:bg-tron-gray-light'
+              ? 'bg-ocean-accent dark:bg-starlight text-white'
+              : 'bg-ocean-light dark:bg-ocean-deep text-ocean-text dark:text-ocean-text-dark border border-ocean-medium/30 dark:border-starlight/30 hover:bg-ocean-medium dark:hover:bg-ocean-deep/80'
           }`}
         >
           All Orders
@@ -105,8 +105,8 @@ export default function MyOrdersPage() {
             onClick={() => setSelectedStatus(status)}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               selectedStatus === status
-                ? 'bg-sherbet-orange dark:bg-tron-orange text-white'
-                : 'bg-cream-dark dark:bg-tron-gray text-text-light dark:text-gray-300 border border-sherbet-orange/30 dark:border-tron-orange/30 hover:bg-cream dark:hover:bg-tron-gray-light'
+                ? 'bg-ocean-accent dark:bg-starlight text-white'
+                : 'bg-ocean-light dark:bg-ocean-deep text-ocean-text dark:text-ocean-text-dark border border-ocean-medium/30 dark:border-starlight/30 hover:bg-ocean-medium dark:hover:bg-ocean-deep/80'
             }`}
           >
             {status.replace('_', ' ')}
@@ -116,7 +116,7 @@ export default function MyOrdersPage() {
 
       {orders.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">No orders found</p>
+          <p className="text-ocean-muted dark:text-ocean-muted-dark mb-4">No orders found</p>
           <Link href="/dashboard/new-order" className="btn-primary">
             Create Your First Order
           </Link>
@@ -127,17 +127,17 @@ export default function MyOrdersPage() {
             <div key={order.id} className="card">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 className="text-lg font-semibold text-ocean-text dark:text-ocean-text-dark">
                     Order #{order.orderNumber}
-                    {order.branch && <span className="text-sherbet-orange dark:text-tron-orange ml-2 text-base font-medium">• {order.branch.name}</span>}
+                    {order.branch && <span className="text-ocean-accent dark:text-starlight ml-2 text-base font-medium">• {order.branch.name}</span>}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{formatDate(order.createdAt)}</p>
+                  <p className="text-sm text-ocean-muted dark:text-ocean-muted-dark">{formatDate(order.createdAt)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`badge ${getStatusBadge(order.status)}`}>
                     {order.status.replace('_', ' ')}
                   </span>
-                  <span className="text-xs px-2 py-1 bg-cream-dark dark:bg-tron-black text-gray-700 dark:text-gray-300 rounded border border-sherbet-orange/30 dark:border-tron-orange/30">
+                  <span className="text-xs px-2 py-1 bg-ocean-light dark:bg-tron-black text-ocean-muted dark:text-ocean-muted-dark rounded border border-ocean-medium/30 dark:border-starlight/30">
                     {order.orderType.replace('_', ' ')}
                   </span>
                 </div>
@@ -152,30 +152,30 @@ export default function MyOrdersPage() {
               )}
 
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
-                  <thead className="bg-cream-dark dark:bg-tron-black">
+                <table className="min-w-full divide-y divide-ocean-accent/20 dark:divide-tron-orange/20">
+                  <thead className="bg-ocean-light dark:bg-tron-black">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase">
+                      <th className="px-4 py-2 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase">
                         Item
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase">
+                      <th className="px-4 py-2 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase">
                         Requested
                       </th>
-                      <th className="px-4 py-2 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase">
+                      <th className="px-4 py-2 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase">
                         Pulled
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-tron-gray-light divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
+                  <tbody className="bg-white dark:bg-ocean-deep divide-y divide-ocean-accent/20 dark:divide-tron-orange/20">
                     {order.items.map((item) => (
                       <tr key={item.id}>
-                        <td className="px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">
+                        <td className="px-4 py-2 text-sm font-medium text-ocean-text dark:text-ocean-text-dark">
                           {item.warehouseItem.itemName}
                         </td>
-                        <td className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                        <td className="px-4 py-2 text-sm text-ocean-muted dark:text-ocean-muted-dark">
                           {item.requestedQty} {item.warehouseItem.unit}
                         </td>
-                        <td className="px-4 py-2 text-sm font-medium text-gray-900 dark:text-white">
+                        <td className="px-4 py-2 text-sm font-medium text-ocean-text dark:text-ocean-text-dark">
                           {item.pulledQty > 0 ? (
                             <span className="text-green-600 dark:text-green-400 font-medium">
                               {item.pulledQty} {item.warehouseItem.unit}

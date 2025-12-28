@@ -15,7 +15,7 @@ export function ChatMessage({ message, isUser }: Props) {
       <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
         isUser
           ? 'bg-orange-500 text-white'
-          : 'bg-gray-100 text-gray-900 dark:bg-tron-gray dark:text-white'
+          : 'bg-gray-100 text-gray-900 dark:bg-ocean-dark dark:text-white'
       }`}>
         <div className="whitespace-pre-line leading-relaxed">{message.content}</div>
         {message.createdAt && (

@@ -109,7 +109,7 @@ export default function ScannedItemModal({ item, onClose, onAction }: ScannedIte
             onClick={() => setActiveTab('details')}
             className={`flex-1 px-4 py-3 text-sm font-medium ${
               activeTab === 'details'
-                ? 'text-tron-orange border-b-2 border-tron-orange'
+                ? 'text-starlight border-b-2 border-starlight'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -119,7 +119,7 @@ export default function ScannedItemModal({ item, onClose, onAction }: ScannedIte
             onClick={() => setActiveTab('adjust')}
             className={`flex-1 px-4 py-3 text-sm font-medium ${
               activeTab === 'adjust'
-                ? 'text-tron-orange border-b-2 border-tron-orange'
+                ? 'text-starlight border-b-2 border-starlight'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
@@ -129,7 +129,7 @@ export default function ScannedItemModal({ item, onClose, onAction }: ScannedIte
             onClick={() => setActiveTab('transfer')}
             className={`flex-1 px-4 py-3 text-sm font-medium ${
               activeTab === 'transfer'
-                ? 'text-tron-orange border-b-2 border-tron-orange'
+                ? 'text-starlight border-b-2 border-starlight'
                 : 'text-gray-400 hover:text-white'
             }`}
           >

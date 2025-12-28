@@ -86,7 +86,7 @@ export default function QuickScanButton() {
     <>
       <button
         onClick={() => setShowScanner(true)}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+        className="w-full bg-ocean-accent dark:bg-starlight hover:bg-ocean-medium dark:hover:bg-starlight-glow text-white p-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 dark:animate-glow shadow-lg"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path

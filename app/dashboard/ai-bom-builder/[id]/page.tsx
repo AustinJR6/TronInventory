@@ -117,7 +117,7 @@ export default function BomReviewPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sherbet-orange dark:border-tron-orange"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ocean-accent dark:border-starlight"></div>
       </div>
     );
   }
@@ -137,14 +137,14 @@ export default function BomReviewPage() {
       <div className="mb-6">
         <Link
           href="/dashboard/ai-bom-builder"
-          className="text-sm text-sherbet-orange dark:text-tron-orange hover:underline mb-2 inline-block font-medium"
+          className="text-sm text-ocean-accent dark:text-starlight hover:underline mb-2 inline-block font-medium"
         >
           ← Back to BOM Builder
         </Link>
 
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm mb-2">{draft.name}</h1>
+        <h1 className="text-3xl font-bold text-ocean-text dark:text-ocean-text-dark drop-shadow-sm mb-2">{draft.name}</h1>
         {draft.description && (
-          <p className="text-gray-700 dark:text-gray-300">{draft.description}</p>
+          <p className="text-ocean-muted dark:text-ocean-muted-dark">{draft.description}</p>
         )}
 
         <div className="mt-4 flex items-center gap-4 text-sm text-gray-700 dark:text-gray-400">
@@ -166,7 +166,7 @@ export default function BomReviewPage() {
       )}
 
       <div className="card">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+        <h2 className="text-xl font-semibold mb-4 text-ocean-text dark:text-ocean-text-dark">
           Review & Match Items
         </h2>
 

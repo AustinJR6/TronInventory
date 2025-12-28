@@ -223,7 +223,7 @@ export default function BranchesPage() {
       {/* Add Branch Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-tron-gray rounded-lg shadow-xl max-w-md w-full p-6 border border-tron-orange/30">
+          <div className="bg-ocean-dark rounded-lg shadow-xl max-w-md w-full p-6 border border-starlight/30">
             <h2 className="text-2xl font-bold text-white mb-4">Add New Branch</h2>
             <div className="space-y-4">
               <div>
@@ -307,7 +307,7 @@ export default function BranchesPage() {
       {/* Edit Branch Modal */}
       {showEditModal && editingBranch && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-tron-gray rounded-lg shadow-xl max-w-md w-full p-6 border border-tron-orange/30">
+          <div className="bg-ocean-dark rounded-lg shadow-xl max-w-md w-full p-6 border border-starlight/30">
             <h2 className="text-2xl font-bold text-white mb-4">Edit Branch</h2>
             <div className="space-y-4">
               <div>
@@ -357,7 +357,7 @@ export default function BranchesPage() {
                   onChange={(e) =>
                     setEditingBranch({ ...editingBranch, active: e.target.checked })
                   }
-                  className="w-4 h-4 text-tron-orange bg-tron-black border-tron-orange/30 rounded focus:ring-tron-orange"
+                  className="w-4 h-4 text-starlight bg-tron-black border-starlight/30 rounded focus:ring-tron-orange"
                 />
                 <label htmlFor="active" className="ml-2 text-sm text-gray-300">
                   Branch is active

@@ -137,8 +137,8 @@ export default function ManagePartRequestsPage() {
           onClick={() => setStatusFilter('')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             statusFilter === ''
-              ? 'bg-tron-orange text-white'
-              : 'bg-tron-gray text-gray-300 border border-tron-orange/30 hover:bg-tron-gray-light'
+              ? 'bg-starlight text-white'
+              : 'bg-ocean-dark text-gray-300 border border-starlight/30 hover:bg-ocean-deep'
           }`}
         >
           All ({statusCounts.all})
@@ -148,7 +148,7 @@ export default function ManagePartRequestsPage() {
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             statusFilter === 'PENDING'
               ? 'bg-yellow-600 text-white'
-              : 'bg-tron-gray text-gray-300 border border-yellow-700/30 hover:bg-tron-gray-light'
+              : 'bg-ocean-dark text-gray-300 border border-yellow-700/30 hover:bg-ocean-deep'
           }`}
         >
           Pending ({statusCounts.PENDING})
@@ -158,7 +158,7 @@ export default function ManagePartRequestsPage() {
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             statusFilter === 'IN_PROGRESS'
               ? 'bg-blue-600 text-white'
-              : 'bg-tron-gray text-gray-300 border border-blue-700/30 hover:bg-tron-gray-light'
+              : 'bg-ocean-dark text-gray-300 border border-blue-700/30 hover:bg-ocean-deep'
           }`}
         >
           In Progress ({statusCounts.IN_PROGRESS})
@@ -168,7 +168,7 @@ export default function ManagePartRequestsPage() {
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             statusFilter === 'FULFILLED'
               ? 'bg-green-600 text-white'
-              : 'bg-tron-gray text-gray-300 border border-green-700/30 hover:bg-tron-gray-light'
+              : 'bg-ocean-dark text-gray-300 border border-green-700/30 hover:bg-ocean-deep'
           }`}
         >
           Fulfilled ({statusCounts.FULFILLED})
@@ -201,32 +201,32 @@ export default function ManagePartRequestsPage() {
             <table className="min-w-full divide-y divide-tron-orange/20">
               <thead className="bg-tron-black">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-starlight uppercase tracking-wider">
                     Item
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-starlight uppercase tracking-wider">
                     Requester
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-starlight uppercase tracking-wider">
                     Quantity
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-starlight uppercase tracking-wider">
                     Urgency
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-starlight uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-starlight uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-starlight uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-tron-gray divide-y divide-tron-orange/20">
+              <tbody className="bg-ocean-dark divide-y divide-tron-orange/20">
                 {partRequests.map((request) => (
-                  <tr key={request.id} className="hover:bg-tron-gray-light">
+                  <tr key={request.id} className="hover:bg-ocean-deep">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-white">{request.itemName}</div>
                       {request.description && (
@@ -258,7 +258,7 @@ export default function ManagePartRequestsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => openUpdateModal(request)}
-                        className="text-tron-orange hover:text-tron-orange-light"
+                        className="text-starlight hover:text-starlight-light"
                       >
                         Update
                       </button>
@@ -274,7 +274,7 @@ export default function ManagePartRequestsPage() {
       {/* Update Request Modal */}
       {showUpdateModal && selectedRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-tron-gray rounded-lg shadow-xl max-w-md w-full p-6 border border-tron-orange/30">
+          <div className="bg-ocean-dark rounded-lg shadow-xl max-w-md w-full p-6 border border-starlight/30">
             <h2 className="text-2xl font-bold text-white mb-4">Update Part Request</h2>
 
             <div className="mb-4 p-3 bg-tron-black/50 rounded-md">

@@ -94,7 +94,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Branding Settings */}
         <div className="lg:col-span-2">
-          <div className="bg-tron-gray rounded-lg p-6 border border-tron-orange/30">
+          <div className="bg-ocean-dark rounded-lg p-6 border border-starlight/30">
             <h2 className="text-xl font-semibold text-white mb-4">Branding</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -107,7 +107,7 @@ export default function SettingsPage() {
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-tron-black border border-tron-orange/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange"
+                  className="w-full px-3 py-2 bg-tron-black border border-starlight/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange"
                   required
                 />
               </div>
@@ -122,7 +122,7 @@ export default function SettingsPage() {
                   value={formData.appName}
                   onChange={(e) => setFormData({ ...formData, appName: e.target.value })}
                   placeholder="Manifest"
-                  className="w-full px-3 py-2 bg-tron-black border border-tron-orange/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange"
+                  className="w-full px-3 py-2 bg-tron-black border border-starlight/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange"
                 />
                 <p className="mt-1 text-xs text-gray-400">Displayed in navigation and page titles</p>
               </div>
@@ -137,7 +137,7 @@ export default function SettingsPage() {
                   value={formData.logoUrl}
                   onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
                   placeholder="https://example.com/logo.png"
-                  className="w-full px-3 py-2 bg-tron-black border border-tron-orange/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange"
+                  className="w-full px-3 py-2 bg-tron-black border border-starlight/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange"
                 />
                 <p className="mt-1 text-xs text-gray-400">External URL to your company logo image</p>
               </div>
@@ -152,14 +152,14 @@ export default function SettingsPage() {
                     id="primaryColor"
                     value={formData.primaryColor || '#FF6B35'}
                     onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    className="h-10 w-20 bg-tron-black border border-tron-orange/30 rounded-md cursor-pointer"
+                    className="h-10 w-20 bg-tron-black border border-starlight/30 rounded-md cursor-pointer"
                   />
                   <input
                     type="text"
                     value={formData.primaryColor || '#FF6B35'}
                     onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
                     placeholder="#FF6B35"
-                    className="flex-1 px-3 py-2 bg-tron-black border border-tron-orange/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange font-mono text-sm"
+                    className="flex-1 px-3 py-2 bg-tron-black border border-starlight/30 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-tron-orange font-mono text-sm"
                   />
                 </div>
                 <p className="mt-1 text-xs text-gray-400">
@@ -182,7 +182,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full bg-tron-orange text-white px-4 py-2 rounded-md hover:bg-tron-orange/90 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full bg-starlight text-white px-4 py-2 rounded-md hover:bg-starlight/90 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -192,7 +192,7 @@ export default function SettingsPage() {
 
         {/* License Info */}
         <div className="space-y-6">
-          <div className="bg-tron-gray rounded-lg p-6 border border-tron-orange/30">
+          <div className="bg-ocean-dark rounded-lg p-6 border border-starlight/30">
             <h2 className="text-xl font-semibold text-white mb-4">License</h2>
 
             {license ? (
@@ -237,7 +237,7 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-400">No license information available</p>
             )}
 
-            <div className="mt-4 pt-4 border-t border-tron-orange/30">
+            <div className="mt-4 pt-4 border-t border-starlight/30">
               <p className="text-xs text-gray-500">
                 Contact support to upgrade or modify your license
               </p>
@@ -245,14 +245,14 @@ export default function SettingsPage() {
           </div>
 
           {/* Current Branding Preview */}
-          <div className="bg-tron-gray rounded-lg p-6 border border-tron-orange/30">
+          <div className="bg-ocean-dark rounded-lg p-6 border border-starlight/30">
             <h2 className="text-xl font-semibold text-white mb-4">Preview</h2>
 
             <div className="space-y-3">
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Current Colors</p>
                 <div
-                  className="h-12 rounded-md border border-tron-orange/30"
+                  className="h-12 rounded-md border border-starlight/30"
                   style={{ backgroundColor: branding.primaryColor }}
                 ></div>
                 <p className="text-xs text-gray-400 mt-1 font-mono">{branding.primaryColor}</p>

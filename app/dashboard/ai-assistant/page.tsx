@@ -241,7 +241,7 @@ export default function AiAssistantPage() {
     <div className="flex h-full flex-col gap-4 p-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-semibold text-ocean-text dark:text-ocean-text-dark">
             Lana - AI Assistant
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-300">

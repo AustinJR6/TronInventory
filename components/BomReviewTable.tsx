@@ -74,7 +74,7 @@ export default function BomReviewTable({
     <div className="space-y-4">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-tron-gray-light">
+          <thead className="bg-gray-50 dark:bg-ocean-deep">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Extracted Item
@@ -93,9 +93,9 @@ export default function BomReviewTable({
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white dark:bg-tron-gray divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="bg-white dark:bg-ocean-dark divide-y divide-gray-200 dark:divide-gray-700">
             {items.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-tron-gray-light">
+              <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-ocean-deep">
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div>
                     <div className="text-sm font-medium dark:text-white">
@@ -116,7 +116,7 @@ export default function BomReviewTable({
                     onChange={(e) =>
                       updateItem(item.id, 'extractedQuantity', parseInt(e.target.value) || 0)
                     }
-                    className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-tron-gray-light dark:text-white"
+                    className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-ocean-deep dark:text-white"
                     min="0"
                   />
                 </td>
@@ -124,7 +124,7 @@ export default function BomReviewTable({
                   <select
                     value={item.warehouseItemId || ''}
                     onChange={(e) => updateItem(item.id, 'warehouseItemId', e.target.value || null)}
-                    className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-tron-gray-light dark:text-white"
+                    className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-ocean-deep dark:text-white"
                   >
                     <option value="">-- Select warehouse item --</option>
                     {warehouseInventory.map((invItem) => (
@@ -162,7 +162,7 @@ export default function BomReviewTable({
       </div>
 
       <div className="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-sm text-ocean-muted dark:text-ocean-muted-dark">
           {items.filter((i) => i.warehouseItemId).length} of {items.length} items matched
         </div>
 

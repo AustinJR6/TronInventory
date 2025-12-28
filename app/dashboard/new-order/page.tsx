@@ -130,14 +130,14 @@ export default function NewOrderPage() {
   const totalItemsInOrder = Object.keys(orderItems).length;
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-900 dark:text-white">Loading inventory...</div>;
+    return <div className="text-center py-8 text-ocean-text dark:text-ocean-text-dark">Loading inventory...</div>;
   }
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Submit New Order</h1>
-        <p className="mt-2 text-gray-700 dark:text-gray-300">
+        <h1 className="text-3xl font-bold text-ocean-text dark:text-ocean-text-dark drop-shadow-sm">Submit New Order</h1>
+        <p className="mt-2 text-ocean-muted dark:text-ocean-muted-dark">
           Select items you need from the warehouse inventory
         </p>
       </div>
@@ -183,8 +183,8 @@ export default function NewOrderPage() {
                   onClick={() => setSelectedCategory('')}
                   className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                     selectedCategory === ''
-                      ? 'bg-sherbet-orange dark:bg-tron-orange text-white'
-                      : 'bg-cream-dark dark:bg-tron-gray text-text-light dark:text-gray-300 border border-sherbet-orange/30 dark:border-tron-orange/30 hover:bg-cream dark:hover:bg-tron-gray-light'
+                      ? 'bg-ocean-accent dark:bg-starlight text-white'
+                      : 'bg-ocean-light dark:bg-ocean-deep text-ocean-text dark:text-ocean-text-dark border border-ocean-medium/30 dark:border-starlight/30 hover:bg-ocean-medium dark:hover:bg-ocean-deep/80'
                   }`}
                 >
                   All
@@ -196,8 +196,8 @@ export default function NewOrderPage() {
                     onClick={() => setSelectedCategory(category)}
                     className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                       selectedCategory === category
-                        ? 'bg-sherbet-orange dark:bg-tron-orange text-white'
-                        : 'bg-cream-dark dark:bg-tron-gray text-text-light dark:text-gray-300 border border-sherbet-orange/30 dark:border-tron-orange/30 hover:bg-cream dark:hover:bg-tron-gray-light'
+                        ? 'bg-ocean-accent dark:bg-starlight text-white'
+                        : 'bg-ocean-light dark:bg-ocean-deep text-ocean-text dark:text-ocean-text-dark border border-ocean-medium/30 dark:border-starlight/30 hover:bg-ocean-medium dark:hover:bg-ocean-deep/80'
                     }`}
                   >
                     {category}
@@ -206,31 +206,31 @@ export default function NewOrderPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
-                  <thead className="bg-cream-dark dark:bg-tron-black">
+                <table className="min-w-full divide-y divide-ocean-accent/20 dark:divide-tron-orange/20">
+                  <thead className="bg-ocean-light dark:bg-tron-black">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase tracking-wider">
                         Item
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase tracking-wider">
                         Available
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase tracking-wider">
                         Quantity
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-tron-gray-light divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
+                  <tbody className="bg-white dark:bg-ocean-deep divide-y divide-ocean-accent/20 dark:divide-tron-orange/20">
                     {filteredItems.map((item) => (
                       <tr key={item.id} className="hover:bg-cream dark:hover:bg-gray-750">
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                        <td className="px-6 py-4 text-sm font-medium text-ocean-text dark:text-ocean-text-dark">
                           {item.itemName}
-                          <div className="text-xs text-gray-600 dark:text-gray-400">{item.category}</div>
+                          <div className="text-xs text-ocean-muted dark:text-ocean-muted-dark">{item.category}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-ocean-muted dark:text-ocean-muted-dark">
                           {item.currentQty} {item.unit}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-ocean-text dark:text-ocean-text-dark">
                           <input
                             type="number"
                             min="0"
@@ -239,9 +239,9 @@ export default function NewOrderPage() {
                             onChange={(e) =>
                               handleQtyChange(item.id, parseInt(e.target.value) || 0)
                             }
-                            className="w-24 px-2 py-1 border-2 border-sherbet-orange dark:border-tron-orange/30 rounded-md focus:ring-2 focus:ring-sherbet-orange-dark dark:focus:ring-tron-orange bg-white dark:bg-tron-black text-gray-900 dark:text-white font-medium"
+                            className="w-24 px-2 py-1 border-2 border-ocean-accent dark:border-starlight/30 rounded-md focus:ring-2 focus:ring-ocean-accent-dark dark:focus:ring-tron-orange bg-white dark:bg-tron-black text-ocean-text dark:text-ocean-text-dark font-medium"
                           />
-                          <span className="ml-2 text-gray-700 dark:text-gray-300">{item.unit}</span>
+                          <span className="ml-2 text-ocean-muted dark:text-ocean-muted-dark">{item.unit}</span>
                         </td>
                       </tr>
                     ))}
@@ -253,10 +253,10 @@ export default function NewOrderPage() {
 
           <div className="lg:col-span-1">
             <div className="card sticky top-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Order Summary</h2>
+              <h2 className="text-xl font-semibold text-ocean-text dark:text-ocean-text-dark mb-4">Order Summary</h2>
 
               <div className="mb-4">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
+                <p className="text-sm text-ocean-muted dark:text-ocean-muted-dark">
                   <span className="font-medium">{totalItemsInOrder}</span> item
                   {totalItemsInOrder !== 1 ? 's' : ''} selected
                 </p>

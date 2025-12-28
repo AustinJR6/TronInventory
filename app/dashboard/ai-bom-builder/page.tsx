@@ -139,7 +139,7 @@ export default function AIBomBuilderPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sherbet-orange dark:border-tron-orange"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ocean-accent dark:border-starlight"></div>
       </div>
     );
   }
@@ -147,10 +147,10 @@ export default function AIBomBuilderPage() {
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm mb-2">
+        <h1 className="text-3xl font-bold text-ocean-text dark:text-ocean-text-dark drop-shadow-sm mb-2">
           AI-Powered BOM Builder
         </h1>
-        <p className="text-gray-700 dark:text-gray-300">
+        <p className="text-ocean-muted dark:text-ocean-muted-dark">
           Upload planset PDFs and let AI extract your materials list automatically
         </p>
       </div>
@@ -171,7 +171,7 @@ export default function AIBomBuilderPage() {
         {/* Upload Section */}
         <div className="lg:col-span-1">
           <div className="card sticky top-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+            <h2 className="text-xl font-semibold mb-4 text-ocean-text dark:text-ocean-text-dark">
               Upload New Planset
             </h2>
             <PdfUploadZone
@@ -183,7 +183,7 @@ export default function AIBomBuilderPage() {
 
         {/* Drafts List Section */}
         <div className="lg:col-span-2">
-          <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+          <h2 className="text-xl font-semibold mb-4 text-ocean-text dark:text-ocean-text-dark">
             My BOM Drafts
           </h2>
 
@@ -202,7 +202,7 @@ export default function AIBomBuilderPage() {
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-ocean-muted dark:text-ocean-muted-dark">
                 No BOM drafts yet. Upload a planset to get started!
               </p>
             </div>

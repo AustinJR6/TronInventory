@@ -21,7 +21,7 @@ interface BomDraftCardProps {
 
 export default function BomDraftCard({ draft, onDelete, onReprocess }: BomDraftCardProps) {
   const statusConfig = {
-    DRAFT: { color: 'badge bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300', label: 'Draft' },
+    DRAFT: { color: 'badge bg-gray-200 dark:bg-gray-700 text-ocean-muted dark:text-ocean-muted-dark', label: 'Draft' },
     PROCESSING: { color: 'badge bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300', label: 'Processing...' },
     PROCESSED: { color: 'badge bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300', label: 'Processed' },
     SUBMITTED: { color: 'badge bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300', label: 'Submitted' },
@@ -40,7 +40,7 @@ export default function BomDraftCard({ draft, onDelete, onReprocess }: BomDraftC
           </div>
 
           {draft.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            <p className="text-sm text-ocean-muted dark:text-ocean-muted-dark mb-2">
               {draft.description}
             </p>
           )}

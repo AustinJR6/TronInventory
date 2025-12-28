@@ -195,7 +195,7 @@ export default function PartRequestsPage() {
       {/* Add Request Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-tron-gray rounded-lg shadow-xl max-w-md w-full p-6 border border-tron-orange/30">
+          <div className="bg-ocean-dark rounded-lg shadow-xl max-w-md w-full p-6 border border-starlight/30">
             <h2 className="text-2xl font-bold text-white mb-4">Request Part</h2>
             <div className="space-y-4">
               <div>

@@ -125,11 +125,11 @@ export default function UpgradePage() {
 
       {/* Current Plan Card */}
       {license && (
-        <div className="mb-8 card border-2 border-tron-orange">
+        <div className="mb-8 card border-2 border-starlight">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-white">Current Plan</h2>
-              <p className="mt-1 text-2xl font-bold text-tron-orange">
+              <p className="mt-1 text-2xl font-bold text-starlight">
                 {tiers[currentTierIndex]?.displayName || license.tier}
               </p>
               <p className="mt-1 text-sm text-gray-300">
@@ -144,7 +144,7 @@ export default function UpgradePage() {
             <div className="text-right">
               <Link
                 href="/dashboard/settings"
-                className="text-sm text-tron-orange hover:text-tron-orange-light underline"
+                className="text-sm text-starlight hover:text-starlight-light underline"
               >
                 Manage License →
               </Link>
@@ -164,14 +164,14 @@ export default function UpgradePage() {
               key={tier.name}
               className={`card relative ${
                 tier.popular
-                  ? 'border-2 border-tron-orange ring-2 ring-tron-orange/20'
+                  ? 'border-2 border-starlight ring-2 ring-tron-orange/20'
                   : isCurrent
                   ? 'border-2 border-green-500'
                   : ''
               }`}
             >
               {tier.popular && (
-                <div className="absolute top-0 right-0 bg-tron-orange text-white px-3 py-1 text-xs font-bold rounded-bl-lg rounded-tr-lg">
+                <div className="absolute top-0 right-0 bg-starlight text-white px-3 py-1 text-xs font-bold rounded-bl-lg rounded-tr-lg">
                   POPULAR
                 </div>
               )}
@@ -258,13 +258,13 @@ export default function UpgradePage() {
           <table className="min-w-full">
             <thead className="bg-tron-black">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-tron-orange uppercase">
+                <th className="px-6 py-3 text-left text-xs font-medium text-starlight uppercase">
                   Feature
                 </th>
                 {tiers.map((tier) => (
                   <th
                     key={tier.name}
-                    className="px-6 py-3 text-center text-xs font-medium text-tron-orange uppercase"
+                    className="px-6 py-3 text-center text-xs font-medium text-starlight uppercase"
                   >
                     {tier.displayName}
                   </th>
@@ -284,7 +284,7 @@ export default function UpgradePage() {
                 { feature: 'API Access', values: ['❌', '❌', '❌', '✅'] },
                 { feature: 'Priority Support', values: ['❌', 'Email', 'Phone & Email', '24/7'] },
               ].map((row, i) => (
-                <tr key={i} className="hover:bg-tron-gray-light">
+                <tr key={i} className="hover:bg-ocean-deep">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {row.feature}
                   </td>

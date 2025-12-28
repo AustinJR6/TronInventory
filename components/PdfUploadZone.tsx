@@ -155,8 +155,8 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
         className={`
           border-2 border-dashed rounded-lg p-8 text-center transition-all
           ${isDragging
-            ? 'border-sherbet-orange dark:border-tron-orange bg-sherbet-orange/10 dark:bg-tron-orange/10'
-            : 'border-gray-300 dark:border-gray-600 hover:border-sherbet-orange dark:hover:border-tron-orange'
+            ? 'border-ocean-accent dark:border-starlight bg-ocean-accent/10 dark:bg-starlight/10'
+            : 'border-gray-300 dark:border-gray-600 hover:border-ocean-accent dark:hover:border-starlight'
           }
           ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
@@ -173,7 +173,7 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
 
         {isUploading ? (
           <div className="space-y-2">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sherbet-orange dark:border-tron-orange mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ocean-accent dark:border-starlight mx-auto"></div>
             <p className="text-sm dark:text-gray-300">Uploading PDF...</p>
           </div>
         ) : (
@@ -192,7 +192,7 @@ export default function PdfUploadZone({ onUploadSuccess, onUploadError }: PdfUpl
               />
             </svg>
             <div className="text-sm dark:text-gray-300">
-              <span className="font-semibold text-sherbet-orange dark:text-tron-orange">
+              <span className="font-semibold text-ocean-accent dark:text-starlight">
                 Click to upload
               </span>{' '}
               or drag and drop

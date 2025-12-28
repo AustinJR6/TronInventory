@@ -13,8 +13,8 @@ export function ConfirmationModal({ actions, onConfirm, onCancel }: Props) {
 
   return (
     <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-tron-gray">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-ocean-dark">
+        <h3 className="text-lg font-semibold text-ocean-text dark:text-ocean-text-dark">
           Confirm {actions.length} {actions.length === 1 ? 'action' : 'actions'}
         </h3>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-200">
@@ -37,7 +37,7 @@ export function ConfirmationModal({ actions, onConfirm, onCancel }: Props) {
                 className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800"
               >
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  <h4 className="text-sm font-semibold text-ocean-text dark:text-ocean-text-dark">
                     {index + 1}. {action.actionType.replace(/_/g, ' ')}
                   </h4>
                 </div>

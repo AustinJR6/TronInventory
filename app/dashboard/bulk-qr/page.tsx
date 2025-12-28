@@ -230,15 +230,15 @@ export default function BulkQRPage() {
   };
 
   if (loading) {
-    return <div className="text-center py-8 text-gray-900 dark:text-white">Loading inventory...</div>;
+    return <div className="text-center py-8 text-ocean-text dark:text-ocean-text-dark">Loading inventory...</div>;
   }
 
   return (
     <div>
       <div className="mb-8 flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white drop-shadow-sm">Bulk QR Code Management</h1>
-          <p className="mt-2 text-gray-700 dark:text-gray-300">
+          <h1 className="text-3xl font-bold text-ocean-text dark:text-ocean-text-dark drop-shadow-sm">Bulk QR Code Management</h1>
+          <p className="mt-2 text-ocean-muted dark:text-ocean-muted-dark">
             Generate and print QR codes for multiple items (SKU required)
           </p>
         </div>
@@ -290,9 +290,9 @@ export default function BulkQRPage() {
 
       {/* Actions */}
       {selectedItems.size > 0 && (
-        <div className="card mb-6 bg-sherbet-orange/10 dark:bg-tron-orange/10 border-2 border-sherbet-orange dark:border-tron-orange">
+        <div className="card mb-6 bg-ocean-accent/10 dark:bg-starlight/10 border-2 border-ocean-accent dark:border-starlight">
           <div className="flex justify-between items-center">
-            <span className="text-gray-900 dark:text-white font-medium">
+            <span className="text-ocean-text dark:text-ocean-text-dark font-medium">
               {selectedItems.size} item(s) selected
             </span>
             <div className="flex gap-3">
@@ -310,41 +310,41 @@ export default function BulkQRPage() {
       {/* Items List */}
       {inventory.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-ocean-muted dark:text-ocean-muted-dark">
             No items with SKUs found. Add SKUs to items to generate QR codes.
           </p>
         </div>
       ) : (
         <div className="card overflow-hidden">
-          <table className="min-w-full divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
-            <thead className="bg-cream-dark dark:bg-tron-black">
+          <table className="min-w-full divide-y divide-ocean-accent/20 dark:divide-tron-orange/20">
+            <thead className="bg-ocean-light dark:bg-tron-black">
               <tr>
                 <th className="px-6 py-3 text-left">
                   <input
                     type="checkbox"
                     checked={selectedItems.size === inventory.length && inventory.length > 0}
                     onChange={toggleAll}
-                    className="rounded border-sherbet-orange dark:border-gray-600 text-sherbet-orange dark:text-tron-orange focus:ring-sherbet-orange dark:focus:ring-tron-orange"
+                    className="rounded border-ocean-accent dark:border-gray-600 text-ocean-accent dark:text-starlight focus:ring-ocean-accent dark:focus:ring-tron-orange"
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase tracking-wider">
                   Item Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase tracking-wider">
                   SKU
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase tracking-wider">
                   Branch
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-bold text-sherbet-orange-dark dark:text-tron-orange uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-bold text-ocean-accent dark:text-starlight uppercase tracking-wider">
                   QR Code
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-tron-gray-light divide-y divide-sherbet-orange/20 dark:divide-tron-orange/20">
+            <tbody className="bg-white dark:bg-ocean-deep divide-y divide-ocean-accent/20 dark:divide-tron-orange/20">
               {inventory.map((item) => (
                 <tr key={item.id} className="hover:bg-cream dark:hover:bg-gray-750">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -352,19 +352,19 @@ export default function BulkQRPage() {
                       type="checkbox"
                       checked={selectedItems.has(item.id)}
                       onChange={() => toggleItem(item.id)}
-                      className="rounded border-sherbet-orange dark:border-gray-600 text-sherbet-orange dark:text-tron-orange focus:ring-sherbet-orange dark:focus:ring-tron-orange"
+                      className="rounded border-ocean-accent dark:border-gray-600 text-ocean-accent dark:text-starlight focus:ring-ocean-accent dark:focus:ring-tron-orange"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-ocean-text dark:text-ocean-text-dark">
                     {item.itemName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-ocean-muted dark:text-ocean-muted-dark">
                     {item.sku}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-ocean-muted dark:text-ocean-muted-dark">
                     {item.category}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-ocean-muted dark:text-ocean-muted-dark">
                     {item.branch?.name || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
