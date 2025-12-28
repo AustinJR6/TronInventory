@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
     let filteredThresholds = thresholds;
     if (belowMin) {
       filteredThresholds = thresholds.filter(
-        (t) => t.warehouseItem.currentQty < t.minLevel
+        (t: typeof thresholds[0]) => t.warehouseItem.currentQty < t.minLevel
       );
     }
 
