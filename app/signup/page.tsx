@@ -33,6 +33,7 @@ export default function SignupPage() {
         'Supplier Management',
         'Inventory Thresholds',
       ],
+      popular: false,
     },
     ELITE: {
       name: 'ELITE',

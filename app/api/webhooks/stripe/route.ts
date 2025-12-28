@@ -215,10 +215,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
  */
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
-    if (!invoice.subscription) return;
+    const subscription = (invoice as any).subscription;
+    const subscriptionId = typeof subscription === 'string'
+      ? subscription
+      : subscription?.id;
+
+    if (!subscriptionId) return;
 
     const license = await prisma.license.findUnique({
-      where: { stripeSubscriptionId: invoice.subscription as string },
+      where: { stripeSubscriptionId: subscriptionId },
     });
 
     if (!license) {
@@ -245,10 +250,15 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
  */
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
-    if (!invoice.subscription) return;
+    const subscription = (invoice as any).subscription;
+    const subscriptionId = typeof subscription === 'string'
+      ? subscription
+      : subscription?.id;
+
+    if (!subscriptionId) return;
 
     const license = await prisma.license.findUnique({
-      where: { stripeSubscriptionId: invoice.subscription as string },
+      where: { stripeSubscriptionId: subscriptionId },
     });
 
     if (!license) {

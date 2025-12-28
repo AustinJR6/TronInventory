@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate status for each threshold
-    const thresholdsWithStatus = filteredThresholds.map((threshold) => {
+    const thresholdsWithStatus = filteredThresholds.map((threshold: typeof thresholds[0]) => {
       const currentQty = threshold.warehouseItem.currentQty;
       let status = 'OK';
 
