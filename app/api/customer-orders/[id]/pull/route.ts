@@ -9,7 +9,7 @@ import { withCompanyScope } from '@/lib/prisma-middleware';
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
-    const { companyId } = await enforceAll(session, {
+    const { companyId, userId } = await enforceAll(session, {
       role: ['ADMIN', 'WAREHOUSE'],
       feature: 'customerManagement',
     });
@@ -71,7 +71,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           delta: -itemUpdate.pulledQty,
           reason: `Pulled for customer order ${order.orderNumber}`,
           source: 'customer_order',
-          createdBy: session.user.id,
+          createdBy: userId,
         },
       });
     }
