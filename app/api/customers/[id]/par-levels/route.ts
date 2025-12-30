@@ -43,7 +43,7 @@ export async function GET(
 
     // Sort by warehouse item name client-side
     const sortedParLevels = parLevels.sort((a, b) =>
-      a.warehouseItem.name.localeCompare(b.warehouseItem.name)
+      a.warehouseItem.itemName.localeCompare(b.warehouseItem.itemName)
     );
 
     return NextResponse.json(sortedParLevels);
