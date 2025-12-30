@@ -6,7 +6,7 @@ import { enforceAll } from '@/lib/enforcement';
 import { withCompanyScope } from '@/lib/prisma-middleware';
 
 // POST pull items for customer order (warehouse operation)
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
@@ -19,7 +19,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // Verify order belongs to company
     const order = await prisma.customerOrder.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
       include: {
@@ -78,7 +78,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     // Update order status to PULLED
     await prisma.customerOrder.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: { status: 'PULLED' },
     });
 

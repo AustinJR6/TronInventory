@@ -6,7 +6,7 @@ import { enforceAll } from '@/lib/enforcement';
 import { withCompanyScope } from '@/lib/prisma-middleware';
 
 // GET customer by ID
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const customer = await prisma.customer.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
       include: {
@@ -62,7 +62,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 // PATCH update customer
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
@@ -74,7 +74,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
     const customer = await prisma.customer.updateMany({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
       data: {
@@ -107,7 +107,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 // DELETE customer (soft delete by setting status to INACTIVE)
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
@@ -117,7 +117,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     await prisma.customer.updateMany({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
       data: {

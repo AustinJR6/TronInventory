@@ -6,7 +6,7 @@ import { enforceAll } from '@/lib/enforcement';
 import { withCompanyScope } from '@/lib/prisma-middleware';
 
 // GET customer inventory
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     const { companyId } = await enforceAll(session, {
@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     // Verify customer belongs to company
     const customer = await prisma.customer.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
     });
@@ -28,7 +28,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const inventory = await prisma.customerInventory.findMany({
       where: {
-        customerId: params.id,
+        customerId: (await params).id,
       },
       include: {
         warehouseItem: true,
@@ -36,7 +36,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           include: {
             parLevels: {
               where: {
-                customerId: params.id,
+                customerId: (await params).id,
               },
             },
           },
@@ -66,7 +66,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 // POST update customer inventory (sales rep counting)
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     const { companyId, userId } = await enforceAll(session, {
@@ -79,7 +79,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // Verify customer belongs to company
     const customer = await prisma.customer.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
     });
@@ -92,7 +92,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const inventory = await prisma.customerInventory.upsert({
       where: {
         customerId_warehouseItemId: {
-          customerId: params.id,
+          customerId: (await params).id,
           warehouseItemId,
         },
       },
@@ -102,7 +102,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         lastCountBy: userId,
       },
       create: {
-        customerId: params.id,
+        customerId: (await params).id,
         warehouseItemId,
         currentQty,
         lastCountDate: new Date(),

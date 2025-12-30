@@ -23,7 +23,7 @@ export async function POST(
     // Verify delivery belongs to company
     const delivery = await prisma.deliveryOrder.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
       include: {
@@ -57,7 +57,7 @@ export async function POST(
 
     // Complete the delivery
     const updatedDelivery = await prisma.deliveryOrder.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         status: 'DELIVERED',
         deliveredAt: new Date(),

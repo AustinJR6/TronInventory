@@ -23,7 +23,7 @@ export async function PATCH(
     // Verify delivery belongs to company
     const delivery = await prisma.deliveryOrder.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
     });
@@ -57,7 +57,7 @@ export async function PATCH(
     }
 
     const updatedDelivery = await prisma.deliveryOrder.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: updateData,
       include: {
         route: true,

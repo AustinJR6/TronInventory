@@ -19,7 +19,7 @@ export async function GET(
 
     const route = await prisma.route.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
       include: {
@@ -89,7 +89,7 @@ export async function PATCH(
     // Verify route belongs to company
     const existingRoute = await prisma.route.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
     });
@@ -99,7 +99,7 @@ export async function PATCH(
     }
 
     const route = await prisma.route.update({
-      where: { id: params.id },
+      where: { id: (await params).id },
       data: {
         name: data.name,
         description: data.description,
@@ -146,7 +146,7 @@ export async function DELETE(
     // Verify route belongs to company
     const route = await prisma.route.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
       include: {
@@ -179,7 +179,7 @@ export async function DELETE(
     }
 
     await prisma.route.delete({
-      where: { id: params.id },
+      where: { id: (await params).id },
     });
 
     return NextResponse.json({ success: true });

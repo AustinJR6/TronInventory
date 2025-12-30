@@ -20,7 +20,7 @@ export async function GET(
     // Verify customer belongs to company
     const customer = await prisma.customer.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
     });
@@ -34,7 +34,7 @@ export async function GET(
 
     const parLevels = await prisma.customerParLevel.findMany({
       where: {
-        customerId: params.id,
+        customerId: (await params).id,
       },
       include: {
         warehouseItem: true,
@@ -71,7 +71,7 @@ export async function POST(
     // Verify customer belongs to company
     const customer = await prisma.customer.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
     });
@@ -102,7 +102,7 @@ export async function POST(
     if (!parLevel || parLevel === 0) {
       await prisma.customerParLevel.deleteMany({
         where: {
-          customerId: params.id,
+          customerId: (await params).id,
           warehouseItemId,
         },
       });
@@ -114,7 +114,7 @@ export async function POST(
     const updatedParLevel = await prisma.customerParLevel.upsert({
       where: {
         customerId_warehouseItemId: {
-          customerId: params.id,
+          customerId: (await params).id,
           warehouseItemId,
         },
       },
@@ -122,7 +122,7 @@ export async function POST(
         parLevel,
       },
       create: {
-        customerId: params.id,
+        customerId: (await params).id,
         warehouseItemId,
         parLevel,
       },
@@ -163,7 +163,7 @@ export async function DELETE(
     // Verify customer belongs to company
     const customer = await prisma.customer.findFirst({
       where: {
-        id: params.id,
+        id: (await params).id,
         ...withCompanyScope(companyId),
       },
     });
@@ -177,7 +177,7 @@ export async function DELETE(
 
     await prisma.customerParLevel.deleteMany({
       where: {
-        customerId: params.id,
+        customerId: (await params).id,
         warehouseItemId,
       },
     });
