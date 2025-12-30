@@ -56,7 +56,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    const { companyId } = await enforceAll(session, {
+    const { companyId, userId } = await enforceAll(session, {
       role: ['ADMIN', 'SALES_REP'],
       feature: 'customerManagement',
     });
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
         deliveryInstructions: data.deliveryInstructions,
         accountNumber,
         routeId: data.routeId,
-        salesRepId: data.salesRepId || session.user.id,
+        salesRepId: data.salesRepId || userId,
         status: 'ACTIVE',
         creditLimit: data.creditLimit,
         paymentTerms: data.paymentTerms,

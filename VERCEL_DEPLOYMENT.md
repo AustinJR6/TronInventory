@@ -71,32 +71,48 @@ You need to create products in Stripe and get their Price IDs:
 
 ---
 
-## ✅ Step 3: Add Stripe Price IDs to Vercel
+## ✅ Step 3: Add Stripe Price IDs to Vercel ✅ CONFIGURED
 
-Go back to **Vercel Settings** → **Environment Variables** and add:
+**Stripe Products Configured**:
+
+### BASE Plan ($49.99/month)
+- Product ID: `prod_Tgp2d3PbUjOLLV`
+- Price ID: `price_1SjRNx51SPyj0yYAaqGsdh7B`
+
+### ELITE Plan ($119.99/month)
+- Product ID: `prod_Tgp3mb0B48y8aA`
+- Price ID: `price_1SjRPp51SPyj0yYAS5isqpHq`
+
+**Environment Variables to Add in Vercel**:
 
 ```bash
 STRIPE_PRICE_BASE
-price_xxxxxxxxxxxxx  # Replace with your BASE product price ID
+price_1SjRNx51SPyj0yYAaqGsdh7B
 
 STRIPE_PRICE_ELITE
-price_xxxxxxxxxxxxx  # Replace with your ELITE product price ID
+price_1SjRPp51SPyj0yYAS5isqpHq
 ```
 
 ---
 
-## ✅ Step 4: Set Up Stripe Webhook (Production)
+## ✅ Step 4: Set Up Stripe Webhook (Production) ✅ CONFIGURED
 
+**Webhook Endpoint**: `https://tron-inventory.vercel.app/api/webhooks/stripe`
+
+**Status**: ✅ Webhook configured and secret added to Vercel environment variables
+
+**Events configured**:
+- ✅ `checkout.session.completed`
+- ✅ `customer.subscription.updated`
+- ✅ `customer.subscription.deleted`
+- ✅ `invoice.payment_succeeded`
+- ✅ `invoice.payment_failed`
+
+**To configure a new webhook** (if needed):
 1. **Go to Stripe Webhooks**: https://dashboard.stripe.com/webhooks
 2. **Click "Add endpoint"**
-3. **Endpoint URL**: `https://your-project-name.vercel.app/api/webhooks/stripe`
-   - Replace `your-project-name.vercel.app` with your actual Vercel URL
-4. **Events to select**:
-   - ✅ `checkout.session.completed`
-   - ✅ `customer.subscription.updated`
-   - ✅ `customer.subscription.deleted`
-   - ✅ `invoice.payment_succeeded`
-   - ✅ `invoice.payment_failed`
+3. **Endpoint URL**: `https://tron-inventory.vercel.app/api/webhooks/stripe`
+4. **Select the 5 events listed above**
 5. **Click "Add endpoint"**
 6. **Click the endpoint** to view details
 7. **Click "Reveal" under Signing secret**
@@ -104,14 +120,13 @@ price_xxxxxxxxxxxxx  # Replace with your ELITE product price ID
 
 ---
 
-## ✅ Step 5: Add Webhook Secret to Vercel
+## ✅ Step 5: Add Webhook Secret to Vercel ✅ CONFIGURED
 
-Go back to **Vercel Settings** → **Environment Variables** and add:
+**Status**: ✅ Webhook secret has been added to Vercel environment variables
 
-```bash
-STRIPE_WEBHOOK_SECRET
-whsec_xxxxxxxxxxxxx  # Replace with your webhook signing secret
-```
+The `STRIPE_WEBHOOK_SECRET` environment variable is configured in Vercel for Production, Preview, and Development environments.
+
+**Note**: For security reasons, the actual webhook secret is stored only in Vercel's environment variables and should never be committed to the repository.
 
 ---
 

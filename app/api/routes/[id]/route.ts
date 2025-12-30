@@ -41,7 +41,7 @@ export async function GET(
             },
           },
         },
-        deliveries: {
+        deliveryOrders: {
           where: {
             scheduledDate: {
               gte: new Date(new Date().setHours(0, 0, 0, 0)),
@@ -104,8 +104,8 @@ export async function PATCH(
         name: data.name,
         description: data.description,
         driverId: data.driverId,
-        daysOfWeek: data.daysOfWeek,
-        isActive: data.isActive,
+        schedule: data.schedule,
+        active: data.active,
       },
       include: {
         driver: {
@@ -118,7 +118,7 @@ export async function PATCH(
         _count: {
           select: {
             customers: true,
-            deliveries: true,
+            deliveryOrders: true,
           },
         },
       },
@@ -153,7 +153,7 @@ export async function DELETE(
         _count: {
           select: {
             customers: true,
-            deliveries: true,
+            deliveryOrders: true,
           },
         },
       },
@@ -171,7 +171,7 @@ export async function DELETE(
       );
     }
 
-    if (route._count.deliveries > 0) {
+    if (route._count.deliveryOrders > 0) {
       return NextResponse.json(
         { error: 'Cannot delete route with delivery history.' },
         { status: 400 }

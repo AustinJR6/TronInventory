@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  WAREHOUSE
+  FIELD
+  SALES_REP
+  DRIVER
+  CUSTOMER_USER
+}
+
+enum BusinessModel {
+  WAREHOUSE_ONLY
+  DISTRIBUTION
+  HYBRID
+}
+
+enum OrderStatus {
+  SUBMITTED
+  IN_PROGRESS
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderType {
+  WEEKLY_STOCK
+  AD_HOC
+  TRANSFER
+}
+
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum CustomerOrderStatus {
+  SUBMITTED
+  APPROVED
+  PULLED
+  LOADED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum CustomerOrderType {
+  STANDARD
+  EMERGENCY
+  STANDING
+}
+
+enum DeliveryStatus {
+  SCHEDULED
+  LOADED
+  IN_TRANSIT
+  ARRIVED
+  DELIVERED
+  FAILED
+}
+
+enum LicenseStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}
+
+enum LicenseTier {
+  BASE
+  ELITE
+  DISTRIBUTION
+}
+
+enum AiConversationStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
+
+enum AiMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum AiActionStatus {
+  PROPOSED
+  CONFIRMED
+  EXECUTED
+  FAILED
+  CANCELLED
+}
+
+enum POStatus {
+  DRAFT
+  SUBMITTED
+  CONFIRMED
+  PARTIAL_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum JobStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum AllocationType {
+  JOB
+  STOCK
+}
+
+model Company {
+  id            String        @id @default(cuid())
+  name          String
+  slug          String        @unique
+  logoUrl       String?
+  primaryColor  String?
+  appName       String?
+  businessModel BusinessModel @default(WAREHOUSE_ONLY)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  license               License?
+  users                 User[]
+  branches              Branch[]
+  warehouseInventory    WarehouseInventory[]
+  vehicleInventoryItems VehicleInventoryItem[]
+  vehicleStocks         VehicleStock[]
+  orders                Order[]
+  inventoryTransactions InventoryTransaction[]
+  partRequests          PartRequest[]
+  bomDrafts             BomDraft[]
+  aiConversations       AiConversation[]
+  aiActions             AiAction[]
+  auditLogs             AuditLog[]
+  distributors          Distributor[]
+  supplierMappings      SupplierItemMapping[]
+  inventoryThresholds   InventoryThreshold[]
+  jobs                  Job[]
+  purchaseOrders        PurchaseOrder[]
+  poReceivingLogs       POReceivingLog[]
+  customers             Customer[]
+  routes                Route[]
+  customerOrders        CustomerOrder[]
+  deliveryOrders        DeliveryOrder[]
+
+  @@map("companies")
+}

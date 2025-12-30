@@ -38,7 +38,9 @@
       "Bash(grep:*)",
       "Bash(dir:*)",
       "Bash(git reset:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx prisma format:*)",
+      "Bash(node update-schema-final.js:*)"
     ],
     "deny": [],
     "ask": []
