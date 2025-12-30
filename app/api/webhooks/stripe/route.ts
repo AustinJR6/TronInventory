@@ -245,6 +245,185 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   }
 }
 
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+  
+  try {
+    // Check if this is from the wizard (has setupData) or old signup flow
+    const isWizardSignup = subscription.metadata?.setupData !== undefined;
+
+    if (isWizardSignup) {
+      await handleWizardCheckout(session, subscription);
+    } else {
+      await handleLegacyCheckout(session, subscription);
+    }
+  } catch (error: any) {
+    console.error('Error in checkout completion:', error);
+    throw error;
+  }
+}
+
+async function handleWizardCheckout(session: Stripe.Checkout.Session, subscription: Stripe.Subscription) {
+  const setupData = JSON.parse(subscription.metadata.setupData || '{}');
+
+  const existingCompany = await prisma.company.findUnique({
+    where: { slug: setupData.slug },
+  });
+
+  if (existingCompany) {
+    console.log('Company already exists, skipping creation');
+    return;
+  }
+
+  const company = await prisma.company.create({
+    data: {
+      name: setupData.companyName,
+      slug: setupData.slug,
+      appName: 'Manifest',
+      businessModel: setupData.businessModel || 'WAREHOUSE_ONLY',
+    },
+  });
+
+  const branchMap = new Map();
+  for (const branchData of setupData.branches) {
+    const branch = await prisma.branch.create({
+      data: {
+        companyId: company.id,
+        name: branchData.name,
+        city: branchData.city,
+        address: branchData.address || null,
+        active: true,
+      },
+    });
+    branchMap.set(branchData.name, branch.id);
+  }
+
+  const firstBranchId = Array.from(branchMap.values())[0];
+  await prisma.user.create({
+    data: {
+      companyId: company.id,
+      email: setupData.adminUser.email,
+      name: `${setupData.adminUser.firstName} ${setupData.adminUser.lastName}`,
+      password: setupData.adminUser.password,
+      role: 'ADMIN',
+      branchId: firstBranchId,
+      active: true,
+    },
+  });
+
+  const bcrypt = await import('bcryptjs');
+  for (const userData of setupData.users || []) {
+    const branchId = userData.branchName ? branchMap.get(userData.branchName) : firstBranchId;
+    await prisma.user.create({
+      data: {
+        companyId: company.id,
+        email: userData.email,
+        name: userData.name,
+        password: await bcrypt.hash(Math.random().toString(36), 10),
+        role: userData.role,
+        branchId: branchId || firstBranchId,
+        active: true,
+      },
+    });
+  }
+
+  const tierLimits = getTierLimitsForWebhook(subscription.metadata.tier);
+  await prisma.license.create({
+    data: {
+      companyId: company.id,
+      status: 'TRIAL',
+      tier: subscription.metadata.tier as any,
+      stripeCustomerId: session.customer as string,
+      stripeSubscriptionId: session.subscription as string,
+      stripePriceId: subscription.items.data[0].price.id,
+      includedBranches: tierLimits.includedBranches,
+      includedUsers: tierLimits.includedUsers,
+      additionalBranches: setupData.additionalBranches || 0,
+      additionalUsers: setupData.additionalUsers || 0,
+      startsAt: new Date(),
+      expiresAt: null,
+    },
+  });
+
+  console.log(`Successfully created company from wizard: ${company.slug}`);
+}
+
+async function handleLegacyCheckout(session: Stripe.Checkout.Session, subscription: Stripe.Subscription) {
+  const metadata = session.metadata!;
+  
+  const existingCompany = await prisma.company.findUnique({
+    where: { slug: metadata.companySlug },
+  });
+
+  if (existingCompany) {
+    console.log('Company already exists, skipping creation');
+    return;
+  }
+
+  const company = await prisma.company.create({
+    data: {
+      name: metadata.companyName,
+      slug: metadata.companySlug,
+      appName: 'Manifest',
+      businessModel: 'WAREHOUSE_ONLY',
+    },
+  });
+
+  const branch = await prisma.branch.create({
+    data: {
+      companyId: company.id,
+      name: 'Main Branch',
+      city: 'Default',
+      active: true,
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      companyId: company.id,
+      email: metadata.email,
+      name: `${metadata.firstName} ${metadata.lastName}`,
+      password: metadata.hashedPassword,
+      role: 'ADMIN',
+      branchId: branch.id,
+      active: true,
+    },
+  });
+
+  await prisma.license.create({
+    data: {
+      companyId: company.id,
+      status: 'TRIAL',
+      tier: (metadata.tier as any) || 'BASE',
+      stripeCustomerId: session.customer as string,
+      stripeSubscriptionId: session.subscription as string,
+      stripePriceId: subscription.items.data[0].price.id,
+      includedBranches: parseInt(metadata.includedBranches || '1'),
+      includedUsers: parseInt(metadata.includedUsers || '10'),
+      additionalBranches: 0,
+      additionalUsers: 0,
+      startsAt: new Date(),
+      expiresAt: null,
+    },
+  });
+
+  console.log(`Successfully created company (legacy): ${company.slug}`);
+}
+
+function getTierLimitsForWebhook(tier: string): { includedBranches: number; includedUsers: number } {
+  switch (tier) {
+    case 'BASE':
+      return { includedBranches: 1, includedUsers: 10 };
+    case 'ELITE':
+      return { includedBranches: 5, includedUsers: 100 };
+    case 'DISTRIBUTION':
+      return { includedBranches: 10, includedUsers: 9999 };
+    default:
+      return { includedBranches: 1, includedUsers: 10 };
+  }
+}
+
+
 /**
  * Handle failed payment
  */

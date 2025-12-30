@@ -45,6 +45,29 @@ const TIER_FEATURES: Record<LicenseTier, string[]> = {
     'aiBomBuilder',
     'aiAssistant',
   ],
+
+  DISTRIBUTION: [
+    'inventoryTracking',
+    'manualAdjustments',
+    'orderManagement',
+    'vehicleStock',
+    'roleBasedAccess',
+    'barcodeScanning',
+    'qrScanning',
+    'partRequests',
+    'supplierManagement',
+    'inventoryThresholds',
+    'purchaseOrders',
+    'poCompilation',
+    'aiBomBuilder',
+    'aiAssistant',
+    'customerManagement',
+    'routeManagement',
+    'deliveryTracking',
+    'salesRepTools',
+    'driverApp',
+    'customerPortal',
+  ],
 };
 
 /**
@@ -249,6 +272,12 @@ export function getTierLimits(tier: LicenseTier): {
         includedBranches: 5,
         includedUsers: 100,
         price: 99.99,
+      };
+    case 'DISTRIBUTION':
+      return {
+        includedBranches: 10,
+        includedUsers: 9999, // Effectively unlimited
+        price: 149.99,
       };
     default:
       return {

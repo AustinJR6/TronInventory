@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 import { Navigation } from '@/components/Navigation';
+import { prisma } from '@/lib/prisma';
 
 export default async function DashboardLayout({
   children,
@@ -14,12 +15,19 @@ export default async function DashboardLayout({
     redirect('/login');
   }
 
+  // Fetch company to get business model
+  const company = await prisma.company.findUnique({
+    where: { id: session.user.companyId },
+    select: { businessModel: true },
+  });
+
   return (
     <div className="min-h-screen flex flex-col transition-colors duration-200 bg-ocean-gradient-subtle dark:bg-ocean-night-subtle">
       <Navigation
         role={session.user.role}
         userName={session.user.name}
         vehicleNumber={session.user.vehicleNumber}
+        businessModel={company?.businessModel || 'WAREHOUSE_ONLY'}
       />
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {children}

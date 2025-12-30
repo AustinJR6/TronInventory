@@ -11,13 +11,17 @@ interface NavigationProps {
   role: string;
   userName: string;
   vehicleNumber?: string;
+  businessModel?: string;
 }
 
-export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
+export function Navigation({ role, userName, vehicleNumber, businessModel }: NavigationProps) {
   const pathname = usePathname();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { branding } = useCompany();
+
+  // Check if company has distribution features
+  const hasDistribution = businessModel === 'DISTRIBUTION' || businessModel === 'HYBRID';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -46,6 +50,10 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/dashboard/warehouse', label: 'Warehouse Inventory' },
       { href: '/dashboard/orders', label: 'Orders' },
+      { href: '/dashboard/customers', label: 'Customers', distribution: true },
+      { href: '/dashboard/routes', label: 'Routes', distribution: true },
+      { href: '/dashboard/customer-orders', label: 'Customer Orders', distribution: true },
+      { href: '/dashboard/deliveries', label: 'Deliveries', distribution: true },
       { href: '/dashboard/ai-assistant', label: 'Lana AI' },
       { href: '/dashboard/ai-bom-builder', label: 'AI BOM Builder' },
       { href: '/dashboard/manage-part-requests', label: 'Part Requests' },
@@ -61,6 +69,8 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard', label: 'Dashboard' },
       { href: '/dashboard/warehouse', label: 'Warehouse Inventory' },
       { href: '/dashboard/orders', label: 'Orders' },
+      { href: '/dashboard/customer-orders', label: 'Customer Orders', distribution: true },
+      { href: '/dashboard/deliveries', label: 'Deliveries', distribution: true },
       { href: '/dashboard/ai-assistant', label: 'Lana AI' },
       { href: '/dashboard/manage-part-requests', label: 'Part Requests' },
       { href: '/dashboard/supplier-mappings', label: 'Supplier Mappings' },
@@ -75,9 +85,29 @@ export function Navigation({ role, userName, vehicleNumber }: NavigationProps) {
       { href: '/dashboard/vehicle-stock', label: 'Vehicle Stock' },
       { href: '/dashboard/part-requests', label: 'Request Parts' },
     ],
+    SALES_REP: [
+      { href: '/dashboard', label: 'Dashboard' },
+      { href: '/dashboard/customers', label: 'My Customers', distribution: true },
+      { href: '/dashboard/customer-orders', label: 'Customer Orders', distribution: true },
+      { href: '/dashboard/routes', label: 'Routes', distribution: true },
+      { href: '/dashboard/ai-assistant', label: 'Lana AI' },
+    ],
+    DRIVER: [
+      { href: '/dashboard', label: 'Dashboard' },
+      { href: '/dashboard/deliveries', label: 'My Deliveries', distribution: true },
+      { href: '/dashboard/routes', label: 'My Route', distribution: true },
+    ],
   };
 
-  const items = navItems[role as keyof typeof navItems] || [];
+  // Filter items based on business model - only show distribution items if company has distribution features
+  const allItems = navItems[role as keyof typeof navItems] || [];
+  const items = allItems.filter(item => {
+    // If item is marked as distribution-only, only show if company has distribution
+    if ((item as any).distribution && !hasDistribution) {
+      return false;
+    }
+    return true;
+  });
 
   // Use CSS variable for primary color
   const primaryColorClass = 'text-[var(--color-primary,#FF6B35)]';

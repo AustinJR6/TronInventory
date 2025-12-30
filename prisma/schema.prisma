@@ -11,6 +11,15 @@ enum UserRole {
   ADMIN
   WAREHOUSE
   FIELD
+  SALES_REP
+  DRIVER
+  CUSTOMER_USER
+}
+
+enum BusinessModel {
+  WAREHOUSE_ONLY
+  DISTRIBUTION
+  HYBRID
 }
 
 enum OrderStatus {
@@ -27,6 +36,37 @@ enum OrderType {
   TRANSFER
 }
 
+enum CustomerStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum CustomerOrderStatus {
+  SUBMITTED
+  APPROVED
+  PULLED
+  LOADED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum CustomerOrderType {
+  STANDARD
+  EMERGENCY
+  STANDING
+}
+
+enum DeliveryStatus {
+  SCHEDULED
+  LOADED
+  IN_TRANSIT
+  ARRIVED
+  DELIVERED
+  FAILED
+}
+
 enum LicenseStatus {
   TRIAL
   ACTIVE
@@ -37,6 +77,7 @@ enum LicenseStatus {
 enum LicenseTier {
   BASE
   ELITE
+  DISTRIBUTION
 }
 
 enum AiConversationStatus {
@@ -81,14 +122,15 @@ enum AllocationType {
 }
 
 model Company {
-  id           String   @id @default(cuid())
-  name         String
-  slug         String   @unique
-  logoUrl      String?
-  primaryColor String?
-  appName      String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String        @id @default(cuid())
+  name          String
+  slug          String        @unique
+  logoUrl       String?
+  primaryColor  String?
+  appName       String?
+  businessModel BusinessModel @default(WAREHOUSE_ONLY)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   license               License?
   users                 User[]
@@ -109,27 +151,31 @@ model Company {
   jobs                  Job[]
   purchaseOrders        PurchaseOrder[]
   poReceivingLogs       POReceivingLog[]
+  customers             Customer[]
+  routes                Route[]
+  customerOrders        CustomerOrder[]
+  deliveryOrders        DeliveryOrder[]
 
   @@map("companies")
 }
 
 model License {
-  id                    String        @id @default(cuid())
-  companyId             String        @unique
-  status                LicenseStatus @default(TRIAL)
-  tier                  LicenseTier   @default(BASE)
-  startsAt              DateTime      @default(now())
-  expiresAt             DateTime?
-  stripeCustomerId      String?       @unique
-  stripeSubscriptionId  String?       @unique
-  stripePriceId         String?
-  includedBranches      Int           @default(1)
-  includedUsers         Int           @default(10)
-  additionalBranches    Int           @default(0)
-  additionalUsers       Int           @default(0)
-  notes                 String?
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
+  id                   String        @id @default(cuid())
+  companyId            String        @unique
+  status               LicenseStatus @default(TRIAL)
+  tier                 LicenseTier   @default(BASE)
+  startsAt             DateTime      @default(now())
+  expiresAt            DateTime?
+  stripeCustomerId     String?       @unique
+  stripeSubscriptionId String?       @unique
+  stripePriceId        String?
+  includedBranches     Int           @default(1)
+  includedUsers        Int           @default(10)
+  additionalBranches   Int           @default(0)
+  additionalUsers      Int           @default(0)
+  notes                String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
@@ -146,9 +192,9 @@ model Branch {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  company            Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  users              User[]
-  warehouseInventory WarehouseInventory[]
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  users               User[]
+  warehouseInventory  WarehouseInventory[]
   vehicleStocks       VehicleStock[]
   orders              Order[]
   aiConversations     AiConversation[]
@@ -172,10 +218,20 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  branch        Branch?        @relation(fields: [branchId], references: [id])
-  orders        Order[]
-  vehicleStocks VehicleStock[]
+  // For sales reps
+  territory      String?
+  commissionRate Float?
+
+  // For drivers
+  licenseNumber String?
+
+  // For customer users
+  customerId String?
+
+  company         Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch?          @relation(fields: [branchId], references: [id])
+  orders          Order[]
+  vehicleStocks   VehicleStock[]
   partRequests    PartRequest[]
   bomDrafts       BomDraft[]
   aiConversations AiConversation[]
@@ -186,20 +242,28 @@ model User {
   submittedPOs    PurchaseOrder[]  @relation("POSubmitter")
   receivingLogs   POReceivingLog[]
 
+  // Distribution relationships
+  customersManaged      Customer[]      @relation("SalesRepCustomers")
+  salesOrders           CustomerOrder[] @relation("SalesRepOrders")
+  createdCustomerOrders CustomerOrder[] @relation("CreatedCustomerOrders")
+  routes                Route[]         @relation("DriverRoutes")
+  deliveries            DeliveryOrder[] @relation("DriverDeliveries")
+  customer              Customer?       @relation("CustomerUsers", fields: [customerId], references: [id])
+
   @@unique([companyId, vehicleNumber])
   @@map("users")
 }
 
 model WarehouseInventory {
-  id          String   @id @default(cuid())
-  companyId   String
-  itemName    String
-  category    String
-  parLevel    Int
-  currentQty  Int
-  unit        String
-  branchId    String?
-  sku         String?
+  id            String   @id @default(cuid())
+  companyId     String
+  itemName      String
+  category      String
+  parLevel      Int
+  currentQty    Int
+  unit          String
+  branchId      String?
+  sku           String?
   qrCodeData    String?  @db.Text
   lastUpdated   DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -215,6 +279,9 @@ model WarehouseInventory {
   supplierMappings      SupplierItemMapping[]
   thresholds            InventoryThreshold[]
   purchaseOrderItems    PurchaseOrderItem[]
+  customerParLevels     CustomerParLevel[]
+  customerInventory     CustomerInventory[]
+  customerOrderItems    CustomerOrderItem[]
 
   @@unique([companyId, itemName, branchId])
   @@unique([companyId, sku, branchId])
@@ -382,30 +449,30 @@ model BomDraft {
   updatedAt         DateTime  @updatedAt
   submittedAt       DateTime?
 
-  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  user    User     @relation(fields: [userId], references: [id])
-  order   Order?   @relation(fields: [orderId], references: [id])
+  company Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User      @relation(fields: [userId], references: [id])
+  order   Order?    @relation(fields: [orderId], references: [id])
   items   BomItem[]
 
   @@map("bom_drafts")
 }
 
 model BomItem {
-  id                  String          @id @default(cuid())
-  bomDraftId          String
-  extractedItemName   String
-  extractedQuantity   Int
-  extractedUnit       String?
-  extractedCategory   String?
-  extractedWireSize   String?         // Wire size (e.g., "10 AWG", "12 AWG")
-  extractedConduitSize String?        // Conduit size (e.g., "1/2\"", "3/4\"")
-  warehouseItemId     String?
-  matchConfidence     MatchConfidence @default(LOW)
-  aiMatchReason       String?         @db.Text
-  manuallyOverridden  Boolean         @default(false)
-  notes               String?         @db.Text
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
+  id                   String          @id @default(cuid())
+  bomDraftId           String
+  extractedItemName    String
+  extractedQuantity    Int
+  extractedUnit        String?
+  extractedCategory    String?
+  extractedWireSize    String? // Wire size (e.g., "10 AWG", "12 AWG")
+  extractedConduitSize String? // Conduit size (e.g., "1/2\"", "3/4\"")
+  warehouseItemId      String?
+  matchConfidence      MatchConfidence @default(LOW)
+  aiMatchReason        String?         @db.Text
+  manuallyOverridden   Boolean         @default(false)
+  notes                String?         @db.Text
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
 
   bomDraft      BomDraft            @relation(fields: [bomDraftId], references: [id], onDelete: Cascade)
   warehouseItem WarehouseInventory? @relation(fields: [warehouseItemId], references: [id])
@@ -425,9 +492,9 @@ model AiConversation {
   lastMessageAt DateTime             @default(now())
   archivedAt    DateTime?
 
-  company  Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id])
-  branch   Branch?  @relation(fields: [branchId], references: [id])
+  company  Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user     User        @relation(fields: [userId], references: [id])
+  branch   Branch?     @relation(fields: [branchId], references: [id])
   messages AiMessage[]
   actions  AiAction[]
 
@@ -570,23 +637,23 @@ model InventoryThreshold {
 }
 
 model Job {
-  id                 String     @id @default(cuid())
-  companyId          String
-  jobNumber          String
-  customerName       String
-  customerContact    String?
-  projectName        String?
-  address            String?
-  status             JobStatus  @default(ACTIVE)
-  estimatedValue     Decimal?   @db.Decimal(12, 2)
-  startDate          DateTime?
-  targetEndDate      DateTime?
-  actualEndDate      DateTime?
-  notes              String?    @db.Text
-  createdBy          String
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
-  completedAt        DateTime?
+  id              String    @id @default(cuid())
+  companyId       String
+  jobNumber       String
+  customerName    String
+  customerContact String?
+  projectName     String?
+  address         String?
+  status          JobStatus @default(ACTIVE)
+  estimatedValue  Decimal?  @db.Decimal(12, 2)
+  startDate       DateTime?
+  targetEndDate   DateTime?
+  actualEndDate   DateTime?
+  notes           String?   @db.Text
+  createdBy       String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  completedAt     DateTime?
 
   company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
   creator            User                @relation(fields: [createdBy], references: [id])
@@ -607,7 +674,7 @@ model PurchaseOrder {
   orderDate        DateTime?
   expectedDelivery DateTime?
   actualDelivery   DateTime?
-  totalCost        Decimal   @db.Decimal(12, 2) @default(0)
+  totalCost        Decimal   @default(0) @db.Decimal(12, 2)
   notes            String?   @db.Text
   createdBy        String
   submittedBy      String?
@@ -631,20 +698,20 @@ model PurchaseOrder {
 }
 
 model PurchaseOrderItem {
-  id             String         @id @default(cuid())
-  poId           String
+  id              String         @id @default(cuid())
+  poId            String
   warehouseItemId String
-  supplierSKU    String?
-  orderedQty     Int
-  receivedQty    Int            @default(0)
-  packSize       Int            @default(1)
-  unitCost       Decimal        @db.Decimal(10, 2)
-  lineTotalCost  Decimal        @db.Decimal(12, 2)
-  allocationType AllocationType
-  jobId          String?
-  notes          String?        @db.Text
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  supplierSKU     String?
+  orderedQty      Int
+  receivedQty     Int            @default(0)
+  packSize        Int            @default(1)
+  unitCost        Decimal        @db.Decimal(10, 2)
+  lineTotalCost   Decimal        @db.Decimal(12, 2)
+  allocationType  AllocationType
+  jobId           String?
+  notes           String?        @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   purchaseOrder PurchaseOrder      @relation(fields: [poId], references: [id], onDelete: Cascade)
   warehouseItem WarehouseInventory @relation(fields: [warehouseItemId], references: [id])
@@ -675,4 +742,169 @@ model POReceivingLog {
 
   @@index([companyId, poId])
   @@map("po_receiving_logs")
+}
+
+// ===================================
+// DISTRIBUTION MODELS
+// ===================================
+
+model Customer {
+  id                   String         @id @default(cuid())
+  companyId            String
+  businessName         String
+  contactName          String?
+  phone                String?
+  email                String?
+  address              String
+  city                 String?
+  state                String?
+  zipCode              String?
+  deliveryInstructions String?
+  accountNumber        String?
+  routeId              String?
+  salesRepId           String?
+  status               CustomerStatus @default(ACTIVE)
+  creditLimit          Float?
+  paymentTerms         String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  company   Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  route     Route?              @relation(fields: [routeId], references: [id])
+  salesRep  User?               @relation("SalesRepCustomers", fields: [salesRepId], references: [id])
+  parLevels CustomerParLevel[]
+  inventory CustomerInventory[]
+  orders    CustomerOrder[]
+  users     User[]              @relation("CustomerUsers")
+
+  @@unique([companyId, accountNumber])
+  @@index([companyId, salesRepId])
+  @@index([companyId, routeId])
+  @@map("customers")
+}
+
+model CustomerParLevel {
+  id              String @id @default(cuid())
+  customerId      String
+  warehouseItemId String
+  parLevel        Int
+
+  customer      Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  warehouseItem WarehouseInventory @relation(fields: [warehouseItemId], references: [id])
+
+  @@unique([customerId, warehouseItemId])
+  @@map("customer_par_levels")
+}
+
+model CustomerInventory {
+  id               String    @id @default(cuid())
+  customerId       String
+  warehouseItemId  String
+  currentQty       Int
+  lastCountDate    DateTime?
+  lastCountBy      String?
+  lastDeliveryDate DateTime?
+
+  customer      Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  warehouseItem WarehouseInventory @relation(fields: [warehouseItemId], references: [id])
+
+  @@unique([customerId, warehouseItemId])
+  @@map("customer_inventory")
+}
+
+model Route {
+  id          String   @id @default(cuid())
+  companyId   String
+  name        String
+  description String?
+  driverId    String?
+  schedule    String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver         User?           @relation("DriverRoutes", fields: [driverId], references: [id])
+  customers      Customer[]
+  deliveryOrders DeliveryOrder[]
+
+  @@unique([companyId, name])
+  @@map("routes")
+}
+
+model CustomerOrder {
+  id              String              @id @default(cuid())
+  companyId       String
+  orderNumber     String              @unique
+  customerId      String
+  createdById     String
+  salesRepId      String?
+  deliveryOrderId String?             @unique
+  status          CustomerOrderStatus @default(SUBMITTED)
+  orderType       CustomerOrderType   @default(STANDARD)
+  subtotal        Float               @default(0)
+  tax             Float               @default(0)
+  total           Float               @default(0)
+  notes           String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  company       Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer      Customer            @relation(fields: [customerId], references: [id])
+  createdBy     User                @relation("CreatedCustomerOrders", fields: [createdById], references: [id])
+  salesRep      User?               @relation("SalesRepOrders", fields: [salesRepId], references: [id])
+  items         CustomerOrderItem[]
+  deliveryOrder DeliveryOrder?
+
+  @@index([companyId, customerId])
+  @@index([companyId, salesRepId])
+  @@index([companyId, status])
+  @@map("customer_orders")
+}
+
+model CustomerOrderItem {
+  id              String  @id @default(cuid())
+  customerOrderId String
+  warehouseItemId String
+  requestedQty    Int
+  pulledQty       Int     @default(0)
+  deliveredQty    Int     @default(0)
+  returnedQty     Int     @default(0)
+  unitPrice       Float?
+  lineTotal       Float?
+  notes           String?
+
+  customerOrder CustomerOrder      @relation(fields: [customerOrderId], references: [id], onDelete: Cascade)
+  warehouseItem WarehouseInventory @relation(fields: [warehouseItemId], references: [id])
+
+  @@map("customer_order_items")
+}
+
+model DeliveryOrder {
+  id              String         @id @default(cuid())
+  companyId       String
+  deliveryNumber  String         @unique
+  routeId         String
+  driverId        String
+  customerOrderId String         @unique
+  scheduledDate   DateTime
+  loadedAt        DateTime?
+  departedAt      DateTime?
+  arrivedAt       DateTime?
+  deliveredAt     DateTime?
+  status          DeliveryStatus @default(SCHEDULED)
+  driverNotes     String?
+  signature       String?        @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  route         Route         @relation(fields: [routeId], references: [id])
+  driver        User          @relation("DriverDeliveries", fields: [driverId], references: [id])
+  customerOrder CustomerOrder @relation(fields: [customerOrderId], references: [id])
+
+  @@index([companyId, routeId])
+  @@index([companyId, driverId])
+  @@index([companyId, status])
+  @@map("delivery_orders")
 }
