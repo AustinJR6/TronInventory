@@ -39,14 +39,14 @@ export async function GET(
       include: {
         warehouseItem: true,
       },
-      orderBy: {
-        warehouseItem: {
-          name: 'asc',
-        },
-      },
     });
 
-    return NextResponse.json(parLevels);
+    // Sort by warehouse item name client-side
+    const sortedParLevels = parLevels.sort((a, b) =>
+      a.warehouseItem.name.localeCompare(b.warehouseItem.name)
+    );
+
+    return NextResponse.json(sortedParLevels);
   } catch (error: any) {
     console.error('Get par levels error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
