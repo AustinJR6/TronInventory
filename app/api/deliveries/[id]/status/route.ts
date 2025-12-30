@@ -8,7 +8,7 @@ import { withCompanyScope } from '@/lib/prisma-middleware';
 // PATCH update delivery status
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
