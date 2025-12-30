@@ -104,6 +104,21 @@ export default function LoginPage() {
             </button>
           </div>
         </form>
+
+        <div className="text-center mt-6">
+          <p className="text-sm text-ocean-muted dark:text-ocean-muted-dark">
+            Don't have an account?{' '}
+            <a
+              href="/signup/wizard"
+              className="font-semibold text-ocean-accent dark:text-starlight hover:text-ocean-medium dark:hover:text-starlight-glow transition-colors duration-300"
+            >
+              Start your free trial
+            </a>
+          </p>
+          <p className="text-xs text-ocean-muted dark:text-ocean-muted-dark mt-2">
+            14-day free trial • No credit card required to start
+          </p>
+        </div>
       </div>
     </div>
   );
