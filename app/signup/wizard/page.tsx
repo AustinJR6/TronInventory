@@ -94,26 +94,42 @@ export default function SignupWizard() {
     setError('');
 
     try {
+      console.log('Submitting signup data:', signupData);
+
       const response = await fetch('/api/signup/wizard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(signupData),
       });
 
-      const data = await response.json();
+      console.log('Response status:', response.status, response.statusText);
+
+      // Try to parse JSON, but handle cases where response is not JSON
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+        console.log('Response data:', data);
+      } else {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error(`Server error: ${response.status} ${response.statusText} - ${text.substring(0, 200)}`);
+      }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Signup failed');
+        throw new Error(data.error || `Signup failed: ${response.status}`);
       }
 
       // Redirect to Stripe Checkout
       if (data.checkoutUrl) {
+        console.log('Redirecting to:', data.checkoutUrl);
         window.location.href = data.checkoutUrl;
       } else {
-        throw new Error('No checkout URL returned');
+        throw new Error('No checkout URL returned from server');
       }
     } catch (err: any) {
-      setError(err.message);
+      console.error('Signup error:', err);
+      setError(err.message || 'An unexpected error occurred');
       setLoading(false);
     }
   };
