@@ -7,8 +7,16 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  // Allow login page, NextAuth API routes, and seed endpoint
-  if (pathname === '/login' || pathname.startsWith('/api/auth') || pathname === '/api/seed' || pathname === '/api/debug-user') {
+  // Allow public routes: login, signup, NextAuth API, webhooks, and seed endpoint
+  if (
+    pathname === '/login' ||
+    pathname.startsWith('/signup') ||
+    pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/api/signup') ||
+    pathname.startsWith('/api/webhooks') ||
+    pathname === '/api/seed' ||
+    pathname === '/api/debug-user'
+  ) {
     return NextResponse.next();
   }
 

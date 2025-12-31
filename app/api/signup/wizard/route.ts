@@ -8,6 +8,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-12-15.clover',
 });
 
+// Test GET handler to verify route is working
+export async function GET() {
+  return NextResponse.json({ message: 'Signup wizard API is working' });
+}
+
 interface SignupWizardData {
   tier: LicenseTier;
   companyName: string;
